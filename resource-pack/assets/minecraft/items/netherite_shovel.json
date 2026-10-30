@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9026,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_shovel"
+        }
+      },
+      {
+        "threshold": 9027,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_shovel"
+        }
+      },
+      {
+        "threshold": 9035,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_shovel"
+        }
+      },
+      {
+        "threshold": 9036,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_shovel"
+        }
+      },
+      {
+        "threshold": 9044,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_shovel"
+        }
+      },
+      {
+        "threshold": 9045,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_shovel"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_shovel"
+    }
+  }
+}

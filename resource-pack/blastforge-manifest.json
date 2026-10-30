@@ -1,0 +1,300 @@
+{
+  "minecraft": "1.21.11",
+  "resource_format": [
+    75,
+    0
+  ],
+  "client_sha1": "ba2df812c2d12e0219c489c4cd9a5e1f0760f5bd",
+  "models": [
+    {
+      "id": "enchanting_anvil",
+      "number": 9000,
+      "carrier": "anvil"
+    },
+    {
+      "id": "forging_book",
+      "number": 9001,
+      "carrier": "enchanted_book"
+    },
+    {
+      "id": "raw_siftie",
+      "number": 9002,
+      "carrier": "prismarine_crystals"
+    },
+    {
+      "id": "siftie_ingot",
+      "number": 9003,
+      "carrier": "iron_ingot"
+    },
+    {
+      "id": "siftie_ore",
+      "number": 9004,
+      "carrier": "deepslate_diamond_ore"
+    },
+    {
+      "id": "siftie_template",
+      "number": 9005,
+      "carrier": "netherite_upgrade_smithing_template"
+    },
+    {
+      "id": "enderite_scrap",
+      "number": 9006,
+      "carrier": "netherite_scrap"
+    },
+    {
+      "id": "enderite_ingot",
+      "number": 9007,
+      "carrier": "netherite_ingot"
+    },
+    {
+      "id": "enderite_ore",
+      "number": 9008,
+      "carrier": "ancient_debris"
+    },
+    {
+      "id": "enderite_template",
+      "number": 9009,
+      "carrier": "netherite_upgrade_smithing_template"
+    },
+    {
+      "id": "enderite_stick",
+      "number": 9010,
+      "carrier": "stick"
+    },
+    {
+      "id": "wardenite_scrap",
+      "number": 9011,
+      "carrier": "netherite_scrap"
+    },
+    {
+      "id": "wardenite_ingot",
+      "number": 9012,
+      "carrier": "netherite_ingot"
+    },
+    {
+      "id": "wardenite_template",
+      "number": 9013,
+      "carrier": "netherite_upgrade_smithing_template"
+    },
+    {
+      "id": "dragon_heart",
+      "number": 9014,
+      "carrier": "dragon_breath"
+    },
+    {
+      "id": "warden_heart",
+      "number": 9015,
+      "carrier": "heart_of_the_sea"
+    },
+    {
+      "id": "bat_wing",
+      "number": 9016,
+      "carrier": "phantom_membrane"
+    },
+    {
+      "id": "fire_book",
+      "number": 9017,
+      "carrier": "enchanted_book"
+    },
+    {
+      "id": "water_book",
+      "number": 9018,
+      "carrier": "enchanted_book"
+    },
+    {
+      "id": "earth_book",
+      "number": 9019,
+      "carrier": "enchanted_book"
+    },
+    {
+      "id": "wind_book",
+      "number": 9020,
+      "carrier": "enchanted_book"
+    },
+    {
+      "id": "darkness_book",
+      "number": 9021,
+      "carrier": "enchanted_book"
+    },
+    {
+      "id": "legendary_scythe",
+      "number": 9022,
+      "carrier": "netherite_sword"
+    },
+    {
+      "id": "siftie_sword",
+      "number": 9023,
+      "carrier": "netherite_sword"
+    },
+    {
+      "id": "siftie_pickaxe",
+      "number": 9024,
+      "carrier": "netherite_pickaxe"
+    },
+    {
+      "id": "siftie_axe",
+      "number": 9025,
+      "carrier": "netherite_axe"
+    },
+    {
+      "id": "siftie_shovel",
+      "number": 9026,
+      "carrier": "netherite_shovel"
+    },
+    {
+      "id": "siftie_hoe",
+      "number": 9027,
+      "carrier": "netherite_hoe"
+    },
+    {
+      "id": "siftie_helmet",
+      "number": 9028,
+      "carrier": "netherite_helmet"
+    },
+    {
+      "id": "siftie_chestplate",
+      "number": 9029,
+      "carrier": "netherite_chestplate"
+    },
+    {
+      "id": "siftie_leggings",
+      "number": 9030,
+      "carrier": "netherite_leggings"
+    },
+    {
+      "id": "siftie_boots",
+      "number": 9031,
+      "carrier": "netherite_boots"
+    },
+    {
+      "id": "enderite_sword",
+      "number": 9032,
+      "carrier": "netherite_sword"
+    },
+    {
+      "id": "enderite_pickaxe",
+      "number": 9033,
+      "carrier": "netherite_pickaxe"
+    },
+    {
+      "id": "enderite_axe",
+      "number": 9034,
+      "carrier": "netherite_axe"
+    },
+    {
+      "id": "enderite_shovel",
+      "number": 9035,
+      "carrier": "netherite_shovel"
+    },
+    {
+      "id": "enderite_hoe",
+      "number": 9036,
+      "carrier": "netherite_hoe"
+    },
+    {
+      "id": "enderite_helmet",
+      "number": 9037,
+      "carrier": "netherite_helmet"
+    },
+    {
+      "id": "enderite_chestplate",
+      "number": 9038,
+      "carrier": "netherite_chestplate"
+    },
+    {
+      "id": "enderite_leggings",
+      "number": 9039,
+      "carrier": "netherite_leggings"
+    },
+    {
+      "id": "enderite_boots",
+      "number": 9040,
+      "carrier": "netherite_boots"
+    },
+    {
+      "id": "wardenite_sword",
+      "number": 9041,
+      "carrier": "netherite_sword"
+    },
+    {
+      "id": "wardenite_pickaxe",
+      "number": 9042,
+      "carrier": "netherite_pickaxe"
+    },
+    {
+      "id": "wardenite_axe",
+      "number": 9043,
+      "carrier": "netherite_axe"
+    },
+    {
+      "id": "wardenite_shovel",
+      "number": 9044,
+      "carrier": "netherite_shovel"
+    },
+    {
+      "id": "wardenite_hoe",
+      "number": 9045,
+      "carrier": "netherite_hoe"
+    },
+    {
+      "id": "wardenite_helmet",
+      "number": 9046,
+      "carrier": "netherite_helmet"
+    },
+    {
+      "id": "wardenite_chestplate",
+      "number": 9047,
+      "carrier": "netherite_chestplate"
+    },
+    {
+      "id": "wardenite_leggings",
+      "number": 9048,
+      "carrier": "netherite_leggings"
+    },
+    {
+      "id": "wardenite_boots",
+      "number": 9049,
+      "carrier": "netherite_boots"
+    },
+    {
+      "id": "anvil_hammer",
+      "number": 9050,
+      "carrier": "paper"
+    },
+    {
+      "id": "anvil_tools",
+      "number": 9051,
+      "carrier": "paper"
+    },
+    {
+      "id": "magician_robes",
+      "number": 9052,
+      "carrier": "paper"
+    },
+    {
+      "id": "miner_helmet",
+      "number": 9053,
+      "carrier": "paper"
+    },
+    {
+      "id": "miner_backpack",
+      "number": 9054,
+      "carrier": "paper"
+    },
+    {
+      "id": "siftie_spear",
+      "number": 9055,
+      "carrier": "netherite_spear"
+    },
+    {
+      "id": "enderite_spear",
+      "number": 9056,
+      "carrier": "netherite_spear"
+    },
+    {
+      "id": "wardenite_spear",
+      "number": 9057,
+      "carrier": "netherite_spear"
+    }
+  ]
+}

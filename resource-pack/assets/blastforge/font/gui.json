@@ -1,0 +1,65 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        "\ue0f0": -8,
+        "\ue0f1": -169
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "blastforge:font/forging.png",
+      "height": 222,
+      "ascent": 13,
+      "chars": [
+        "\ue000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "blastforge:font/upgrading.png",
+      "height": 222,
+      "ascent": 13,
+      "chars": [
+        "\ue001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "blastforge:font/ritual.png",
+      "height": 222,
+      "ascent": 13,
+      "chars": [
+        "\ue002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "blastforge:font/outline_1.png",
+      "height": 222,
+      "ascent": 13,
+      "chars": [
+        "\ue010"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "blastforge:font/outline_2.png",
+      "height": 222,
+      "ascent": 13,
+      "chars": [
+        "\ue011"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "blastforge:font/outline_3.png",
+      "height": 222,
+      "ascent": 13,
+      "chars": [
+        "\ue012"
+      ]
+    }
+  ]
+}

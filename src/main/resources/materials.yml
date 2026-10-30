@@ -1,0 +1,96 @@
+tiers:
+  siftie:
+    # Numbers as shown in the item tooltip.
+    sword-damage: 9
+    attack-damage: {pickaxe: 7, axe: 10, shovel: 6.5, hoe: 2, spear: 6}
+    attack-speed: {sword: 1.7, pickaxe: 1, axe: 1.2, shovel: 1, hoe: 4.5, spear: 1}
+    armor-points: {helmet: 4, chestplate: 9, leggings: 7, boots: 4}
+    armor-toughness: 4
+    knockback-resistance: 0.15   # tooltip shows +1.5 per piece
+    tool-durability: 2500
+    # Netherite armor's proportions, scaled so the weakest piece (helmet) has 650.
+    armor-durability: {helmet: 650, chestplate: 945, leggings: 886, boots: 768}
+    mining-speed: 1.15
+  enderite:
+    # Numbers as shown in the item tooltip.
+    sword-damage: 9
+    attack-damage: {pickaxe: 7, axe: 10, shovel: 6.5, hoe: 2, spear: 6}
+    attack-speed: {sword: 1.7, pickaxe: 1, axe: 1.3, shovel: 1, hoe: 4.5, spear: 1}
+    armor-points: {helmet: 4, chestplate: 9, leggings: 7, boots: 4}
+    armor-toughness: 5
+    knockback-resistance: {helmet: 0.2, chestplate: 0.2, leggings: 0.15, boots: 0.15}   # tooltip shows x10
+    tool-durability: 3157
+    # Netherite armor's proportions, scaled so the weakest piece (helmet) has 750.
+    armor-durability: {helmet: 750, chestplate: 1091, leggings: 1023, boots: 886}
+    # Mining speed multiplier on top of netherite. Pickaxe x7: even without Efficiency it instantly mines stone and
+    # cobblestone, and deepslate takes a moment. Shovel x1.5: faster than netherite, not instant without Efficiency.
+    mining-speed: {pickaxe: 7.0, shovel: 1.5, axe: 1.0, hoe: 1.0, sword: 1.0, spear: 1.0}
+    pearl-damage-reduction: 0.5
+  wardenite:
+    # Numbers as shown in the item tooltip.
+    sword-damage: 10
+    attack-damage: {pickaxe: 7, axe: 11, shovel: 6.5, hoe: 2, spear: 7}
+    attack-speed: {sword: 1.9, pickaxe: 1, axe: 1.5, shovel: 1, hoe: 4.5, spear: 1.4}
+    armor-points: {helmet: 5, chestplate: 10, leggings: 8, boots: 5}
+    armor-toughness: 6
+    knockback-resistance: {helmet: 0.25, chestplate: 0.25, leggings: 0.2, boots: 0.2}   # tooltip shows x10
+    tool-durability: 3657
+    armor-durability: {helmet: 1000, chestplate: 1190, leggings: 1150, boots: 1080}
+    # Pickaxe x10: without Efficiency it instantly mines stone, cobblestone and deepslate.
+    # Shovel x1.5: faster than netherite, not instant without Efficiency.
+    mining-speed: {pickaxe: 10.0, shovel: 1.5, axe: 1.0, hoe: 1.0, sword: 1.0, spear: 1.0}
+    sonic-damage-reduction: 0.2
+    glint: true   # enchantment-style shimmer on Wardenite armor
+    helmet-glint: false   # the 3D horned helmet looks better without it
+    tool-glint: false     # tools and weapons (sword, pickaxe, axe, shovel, hoe, spear)
+generation:
+  # Siftie: about as common as diamonds. Each vein has 1 to vein-size blocks.
+  siftie:
+    enabled: true
+    attempts: 2
+    vein-size: 4
+    # Veins look for a spot on a cave wall first (like diamonds) so players can see them.
+    visible-search: 48
+    min-y: -60
+    max-y: -30
+  enderite:
+    enabled: true
+    attempts: 1
+    vein-size: 5
+    # Like ancient debris: veins stay buried inside the islands and never touch air.
+    visible-search: 0
+    hide-from-air: true
+    # Chance that a chunk gets a tiny vein lying on top of the island (0.01 = about 1 chunk in 100).
+    surface-chance: 0.01
+    surface-vein-size: 2
+    min-y: 20
+    max-y: 70
+    minimum-distance: 1024
+drops:
+  wardenite-scrap:
+    looting-0: 1
+    looting-1: 1
+    looting-2: 2
+    looting-3: 3
+loot:
+  wardenite-template-chance: 0.2
+armor-perks:
+  activation: any-piece
+  inherit: true
+  ender-pearl-reduction: 0.5
+  sonic-boom-reduction: 0.2
+upgrades:
+  netherite: 5
+  siftie: 8
+  enderite: 12
+  wardenite: 16
+# Time in seconds to break each ore with an Efficiency V pickaxe (other pickaxes scale from this).
+mining-seconds:
+  siftie: 10                  # netherite pickaxe
+  enderite: 20                # netherite pickaxe
+  enderite-with-siftie: 15    # Siftie, Enderite or Wardenite pickaxe
+# Ore overlays (the custom ore look) for exposed ores. Raise these if some ores look like vanilla blocks.
+ore-visuals:
+  enabled: true
+  max-displays: 2048
+  max-per-chunk: 64

@@ -1,0 +1,16 @@
+maximum-scythes: 1
+# A dropped scythe removed by ANOTHER plugin (e.g. an item-clearing plugin) only frees the limit when this is true.
+# Lava, fire, cactus, explosions, the void and despawning always count as destroyed; chunk unloads never do.
+plugin-removal-destroys: false
+durability: 5000
+ritual-duration: 5
+repair-enabled: true
+repair-fraction: 0.25
+enchanting-enabled: true
+dash: {distance: 5, damage: 10, cooldown: 30}
+flight: {duration: 30, cooldown: 90}
+windmill: {duration: 5, radius: 3, damage: 4, hit-interval: 1, cooldown: 30}
+drops:
+  dragon-heart: 1.0
+  warden-heart: 0.2
+  bat-wing: 0.5

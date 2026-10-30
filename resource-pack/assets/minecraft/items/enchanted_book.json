@@ -1,0 +1,69 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/forging_book"
+        }
+      },
+      {
+        "threshold": 9002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/enchanted_book"
+        }
+      },
+      {
+        "threshold": 9017,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/fire_book"
+        }
+      },
+      {
+        "threshold": 9018,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/water_book"
+        }
+      },
+      {
+        "threshold": 9019,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/earth_book"
+        }
+      },
+      {
+        "threshold": 9020,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wind_book"
+        }
+      },
+      {
+        "threshold": 9021,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/darkness_book"
+        }
+      },
+      {
+        "threshold": 9022,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/enchanted_book"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/enchanted_book"
+    }
+  }
+}

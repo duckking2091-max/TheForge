@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "blastforge:item/siftie_ore",
+    "particle": "blastforge:item/siftie_ore"
+  }
+}

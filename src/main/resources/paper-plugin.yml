@@ -1,0 +1,34 @@
+name: TheForge
+version: '1.0.0'
+main: dev.duckmc.blastforge.BlastForge
+bootstrapper: dev.duckmc.blastforge.BlastBootstrap
+api-version: '1.21.11'
+description: The Forge - blast mining, Forging Anvil, equipment progression, magic and custom merchants for Paper 1.21.11.
+author: DuckMC
+dependencies:
+  server:
+    WorldGuard:
+      load: BEFORE
+      required: false
+      join-classpath: true
+permissions:
+  blastforge.use:
+    default: true
+  blastforge.guide:
+    description: Get The Forging Starter guide book with /forge guide.
+    default: true
+  blastforge.reload:
+    default: op
+  blastforge.give:
+    default: op
+  blastforge.open:
+    default: op
+  blastforge.scythe.admin:
+    default: op
+  blastforge.miner.spawn:
+    default: op
+  blastforge.debug:
+    default: op
+  blastforge.admin:
+    description: Gives The Forge items for administration and testing.
+    default: op

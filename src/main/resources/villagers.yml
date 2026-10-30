@@ -1,0 +1,90 @@
+magician:
+  enabled: true
+  claim-radius: 8
+  claim-interval: 10
+  claim-max-checks: 16
+  maximum-claims: 256
+  work-radius: 4
+  restock-seconds: 600
+  restocks-per-day: 2
+  level-xp: [10, 70, 150, 250]
+  # Each Magician gets its own random offers, rolled once and kept forever (saved with the villager).
+  # Per villager level 1..5: how many offers unlock, and how many of them are elemental books.
+  # Defaults: 2 offers per level, 1 book at levels 1-4, so every Magician sells all four books by level 4.
+  # The Darkness Book is never sold. Set enabled: false for the old fixed order (uses each trade's "level").
+  random-trades:
+    enabled: true
+    trades-per-level: [2, 2, 2, 2, 2]
+    books-per-level: [1, 1, 1, 1, 0]
+    allow-duplicates: false
+  # min-level: the earliest level a trade may be rolled at (random mode). "level" is only used in fixed mode.
+  trades:
+    fire_book: {level: 1, min-level: 1, emeralds: 24, amount: 1, max-uses: 3}
+    water_book: {level: 2, min-level: 1, emeralds: 28, amount: 1, max-uses: 3}
+    earth_book: {level: 3, min-level: 1, emeralds: 32, amount: 1, max-uses: 3}
+    wind_book: {level: 4, min-level: 1, emeralds: 40, amount: 1, max-uses: 3}
+    experience_bottle: {level: 1, min-level: 1, emeralds: 3, amount: 1, max-uses: 12}
+    lapis_lazuli: {level: 1, min-level: 1, emeralds: 2, amount: 8, max-uses: 16}
+    enchanted_book: {level: 2, min-level: 1, emeralds: 20, amount: 1, max-uses: 6}
+    ender_pearl: {level: 3, min-level: 1, emeralds: 5, amount: 2, max-uses: 12}
+    echo_shard: {level: 5, min-level: 5, emeralds: 32, amount: 1, max-uses: 3}
+    amethyst_shard: {level: 2, min-level: 1, emeralds: 3, amount: 4, max-uses: 12}
+miner:
+  enabled: true
+  interval-seconds: 1200
+  max-active: 16
+  base-chance: 0.05
+  villager-bonus: 0.05
+  population-radius: 32
+  spawn-radius: 24
+  min-spawn-distance: 12
+  duplicate-radius: 128
+  attempts: 16
+  max-uses: 12
+  stability-seconds: 600
+  stability-radius: 64
+  despawn-seconds: 1800
+  restock-seconds: 600
+  # Trades are rolled once when a Miner spawns and kept until it leaves (restocking only refills uses).
+  offers:
+    minerals: 9          # random buying/selling mineral trades (a mix of both, never the same item twice)
+    pickaxes: 2          # random enchanted pickaxes for sale
+    quantity-min: 1      # items per trade for ingots and raw metals (iron, gold, copper)
+    quantity-max: 5
+  # Everything trades as items, never ore blocks. Prices are emeralds per item, multiplied by the number of
+  # items (the Miner pays rounded down and charges rounded up, always at least 1 emerald).
+  # Ingots and raw metals trade 1-5 at a time; the other minerals use "amount" items per trade.
+  # Add "enabled: false" to remove one, e.g.  quartz: {enabled: false}
+  minerals:
+    raw_iron:       {buy-price: 0.6,  sell-price: 1.0}
+    iron_ingot:     {buy-price: 0.8,  sell-price: 1.3}
+    raw_gold:       {buy-price: 0.9,  sell-price: 1.5}
+    gold_ingot:     {buy-price: 1.2,  sell-price: 2.0}
+    raw_copper:     {buy-price: 0.3,  sell-price: 0.5}
+    copper_ingot:   {buy-price: 0.4,  sell-price: 0.7}
+    coal:           {amount: 8, buy-price: 0.15, sell-price: 0.3}
+    redstone:       {amount: 8, buy-price: 0.15, sell-price: 0.3}
+    lapis_lazuli:   {amount: 6, buy-price: 0.25, sell-price: 0.5}
+    diamond:        {amount: 1, buy-price: 4,    sell-price: 7}
+    amethyst_shard: {amount: 4, buy-price: 0.3,  sell-price: 0.6}
+    quartz:         {amount: 8, buy-price: 0.15, sell-price: 0.3}
+  ore-min-price: 1
+  ore-max-price: 10
+  # Enchanted pickaxes: weight = how often each material is picked (higher-value ones rarer).
+  pickaxes:
+    stone:   {weight: 40, base-price: 2}
+    iron:    {weight: 30, base-price: 5}
+    golden:  {weight: 20, base-price: 6}
+    diamond: {weight: 10, base-price: 14}
+  enchantments-per-pickaxe: 3   # 1 to this many; Fortune and Silk Touch never together
+  enchantments:
+    efficiency: {enabled: true, max-level: 5, price-per-level: 2}
+    unbreaking: {enabled: true, max-level: 3, price-per-level: 1.5}
+    fortune:    {enabled: true, max-level: 3, price-per-level: 4}
+    silk_touch: {enabled: true, max-level: 1, price-per-level: 6}
+    mending:    {enabled: true, max-level: 1, price-per-level: 10}
+  pickaxe-min-price: 1
+  pickaxe-max-price: 64
+  pickaxe-max-uses: 3
+  forging-book-emeralds: 30
+  forging-book-max-uses: 3

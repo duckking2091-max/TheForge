@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9027,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_hoe"
+        }
+      },
+      {
+        "threshold": 9028,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_hoe"
+        }
+      },
+      {
+        "threshold": 9036,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_hoe"
+        }
+      },
+      {
+        "threshold": 9037,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_hoe"
+        }
+      },
+      {
+        "threshold": 9045,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_hoe"
+        }
+      },
+      {
+        "threshold": 9046,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_hoe"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_hoe"
+    }
+  }
+}

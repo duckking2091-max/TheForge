@@ -1,0 +1,132 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9055,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": [
+                "gui",
+                "ground",
+                "fixed",
+                "on_shelf"
+              ],
+              "model": {
+                "type": "minecraft:model",
+                "model": "blastforge:item/siftie_spear"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "blastforge:item/siftie_spear_in_hand"
+          }
+        }
+      },
+      {
+        "threshold": 9056,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": [
+                "gui",
+                "ground",
+                "fixed",
+                "on_shelf"
+              ],
+              "model": {
+                "type": "minecraft:model",
+                "model": "blastforge:item/enderite_spear"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "blastforge:item/enderite_spear_in_hand"
+          }
+        }
+      },
+      {
+        "threshold": 9057,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": [
+                "gui",
+                "ground",
+                "fixed",
+                "on_shelf"
+              ],
+              "model": {
+                "type": "minecraft:model",
+                "model": "blastforge:item/wardenite_spear"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "blastforge:item/wardenite_spear_in_hand"
+          }
+        }
+      },
+      {
+        "threshold": 9058,
+        "model": {
+          "type": "minecraft:select",
+          "cases": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "minecraft:item/netherite_spear"
+              },
+              "when": [
+                "gui",
+                "ground",
+                "fixed",
+                "on_shelf"
+              ]
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/netherite_spear_in_hand"
+          },
+          "property": "minecraft:display_context"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:select",
+      "cases": [
+        {
+          "model": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/netherite_spear"
+          },
+          "when": [
+            "gui",
+            "ground",
+            "fixed",
+            "on_shelf"
+          ]
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/netherite_spear_in_hand"
+      },
+      "property": "minecraft:display_context"
+    }
+  },
+  "swap_animation_scale": 1.95
+}

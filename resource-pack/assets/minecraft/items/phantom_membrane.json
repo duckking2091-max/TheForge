@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9016,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/bat_wing"
+        }
+      },
+      {
+        "threshold": 9017,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/phantom_membrane"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/phantom_membrane"
+    }
+  }
+}

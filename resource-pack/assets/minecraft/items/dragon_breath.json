@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9014,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/dragon_heart"
+        }
+      },
+      {
+        "threshold": 9015,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/dragon_breath"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/dragon_breath"
+    }
+  }
+}

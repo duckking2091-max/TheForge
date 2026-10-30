@@ -1,0 +1,61 @@
+{
+ "textures": {
+  "core": "blastforge:item/rune_hearth_core",
+  "particle": "blastforge:item/rune_hearth_core"
+ },
+ "ambientocclusion": false,
+ "elements": [
+  {
+   "name": "hearth_core",
+   "from": [
+    4,
+    16.52,
+    4
+   ],
+   "to": [
+    12,
+    16.62,
+    12
+   ],
+   "faces": {
+    "up": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#core"
+    },
+    "down": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#core"
+    }
+   }
+  }
+ ],
+ "display": {
+  "fixed": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  }
+ }
+}

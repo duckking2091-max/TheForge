@@ -1,0 +1,111 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9050,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/anvil_hammer"
+        }
+      },
+      {
+        "threshold": 9051,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/anvil_tools"
+        }
+      },
+      {
+        "threshold": 9052,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/magician_robes"
+        }
+      },
+      {
+        "threshold": 9053,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/miner_helmet"
+        }
+      },
+      {
+        "threshold": 9054,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/miner_backpack"
+        }
+      },
+      {
+        "threshold": 9055,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/paper"
+        }
+      },
+      {
+        "threshold": 9058,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/magician_hat"
+        }
+      },
+      {
+        "threshold": 9059,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/tab_forging"
+        }
+      },
+      {
+        "threshold": 9060,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/tab_upgrading"
+        }
+      },
+      {
+        "threshold": 9061,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/tab_ritual"
+        }
+      },
+      {
+        "threshold": 9062,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/tab_rename"
+        }
+      },
+      {
+        "threshold": 9063,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/tab_close"
+        }
+      },
+      {
+        "threshold": 9064,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/guide_button"
+        }
+      },
+      {
+        "threshold": 9065,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/paper"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/paper"
+    }
+  }
+}

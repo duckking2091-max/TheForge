@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "blastforge:siftie"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "blastforge:siftie"
+      }
+    ]
+  }
+}

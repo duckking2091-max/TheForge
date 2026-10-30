@@ -1,0 +1,46 @@
+# Legacy entries retained for old configurations. New Book of Forging offers
+# come exclusively from the Wandering Miner; existing locked trades remain.
+forging-book-trade-chance: 0.0
+forging-book-emeralds: 24
+# Chance for a Blast book offer, including experimental villager-trade worlds.
+blast-book-trade-chance: 0.04
+blast-book-base-emeralds: 12
+# Relative level weights when a Blast offer is generated: I 80%, II 17%, III 3%.
+# Zero disables a level; if all are zero, defaults are used.
+blast-level-weights:
+  '1': 80
+  '2': 17
+  '3': 3
+# Internal one-time migration marker. Keep this entry.
+rarity-version: 1
+
+# Expansion workstation settings. Experience costs are player levels.
+forging:
+  experience-levels: 4
+  extraction-levels: 0
+  animation-seconds: 3
+disabled-worlds: []
+resource-pack:
+  enabled: true
+  # Leave url and sha1 empty to use the pack from server.properties
+  # (resource-pack=..., resource-pack-sha1=..., require-resource-pack=..., resource-pack-prompt=...).
+  # Fill them in only to send a different pack from the plugin instead.
+  url: ''
+  sha1: ''
+  # The pack always remains optional so vanilla fallback stays usable.
+  # Set true if every player installs the pack themselves (Options > Resource Packs) instead of
+  # downloading it from the server. Players without the pack would then see blank boxes in screens.
+  assume-installed: true
+  required: false
+  prompt: 'The Forge models and interfaces'
+visuals:
+  enabled: true
+  max-station-displays: 128
+  max-villagers: 64
+
+# The Forging Starter: the in-game guide book. Players can always get one with /forge guide.
+# Its text is in guide.yml.
+guide:
+  give-on-first-join: true          # new players get one copy the first time they join (never again)
+  give-to-existing-players: false   # also give one copy to players who had joined before this was installed
+  craftable: true                   # craft a copy from a book + an iron ingot (shown in the recipe book)

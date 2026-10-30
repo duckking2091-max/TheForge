@@ -1,0 +1,278 @@
+{
+ "textures": {
+  "t": "blastforge:item/wardenite_helmet_model",
+  "particle": "blastforge:item/wardenite_helmet_model"
+ },
+ "elements": [
+  {
+   "from": [
+    -1,
+    -1,
+    -1
+   ],
+   "to": [
+    17,
+    17,
+    17
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      4.0,
+      0.0,
+      8.0,
+      8.0
+     ],
+     "texture": "#t"
+    },
+    "south": {
+     "uv": [
+      0.0,
+      8.0,
+      4.0,
+      16.0
+     ],
+     "texture": "#t"
+    },
+    "east": {
+     "uv": [
+      8.0,
+      0.0,
+      12.0,
+      8.0
+     ],
+     "texture": "#t"
+    },
+    "west": {
+     "uv": [
+      12.0,
+      0.0,
+      16.0,
+      8.0
+     ],
+     "texture": "#t"
+    },
+    "up": {
+     "uv": [
+      0.0,
+      0.0,
+      4.0,
+      8.0
+     ],
+     "texture": "#t"
+    },
+    "down": {
+     "uv": [
+      0.0,
+      0.0,
+      4.0,
+      8.0
+     ],
+     "texture": "#t"
+    }
+   }
+  },
+  {
+   "from": [
+    -16,
+    7,
+    7.98
+   ],
+   "to": [
+    -1,
+    22,
+    8.02
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      8.0,
+      8.0,
+      12.0,
+      16.0
+     ],
+     "texture": "#t"
+    },
+    "south": {
+     "uv": [
+      4.0,
+      8.0,
+      8.0,
+      16.0
+     ],
+     "texture": "#t"
+    }
+   }
+  },
+  {
+   "from": [
+    17,
+    7,
+    7.98
+   ],
+   "to": [
+    32,
+    22,
+    8.02
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      4.0,
+      8.0,
+      8.0,
+      16.0
+     ],
+     "texture": "#t"
+    },
+    "south": {
+     "uv": [
+      8.0,
+      8.0,
+      12.0,
+      16.0
+     ],
+     "texture": "#t"
+    }
+   }
+  }
+ ],
+ "display": {
+  "head": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  },
+  "gui": {
+   "rotation": [
+    25,
+    200,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.45,
+    0.45,
+    0.45
+   ]
+  },
+  "ground": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    2,
+    0
+   ],
+   "scale": [
+    0.3,
+    0.3,
+    0.3
+   ]
+  },
+  "fixed": {
+   "rotation": [
+    0,
+    180,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.5,
+    0.5,
+    0.5
+   ]
+  },
+  "thirdperson_righthand": {
+   "rotation": [
+    75,
+    45,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.33,
+    0.33,
+    0.33
+   ]
+  },
+  "thirdperson_lefthand": {
+   "rotation": [
+    75,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    2.5,
+    0
+   ],
+   "scale": [
+    0.33,
+    0.33,
+    0.33
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    0,
+    45,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.35,
+    0.35,
+    0.35
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    0,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.35,
+    0.35,
+    0.35
+   ]
+  }
+ }
+}

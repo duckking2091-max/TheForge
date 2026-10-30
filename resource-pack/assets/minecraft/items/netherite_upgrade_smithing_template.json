@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_template"
+        }
+      },
+      {
+        "threshold": 9006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_upgrade_smithing_template"
+        }
+      },
+      {
+        "threshold": 9009,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_template"
+        }
+      },
+      {
+        "threshold": 9010,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_upgrade_smithing_template"
+        }
+      },
+      {
+        "threshold": 9013,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_template"
+        }
+      },
+      {
+        "threshold": 9014,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_upgrade_smithing_template"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_upgrade_smithing_template"
+    }
+  }
+}

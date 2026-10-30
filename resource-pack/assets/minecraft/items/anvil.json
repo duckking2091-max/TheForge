@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9000,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enchanting_anvil"
+        }
+      },
+      {
+        "threshold": 9001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:block/anvil"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/anvil"
+    }
+  }
+}

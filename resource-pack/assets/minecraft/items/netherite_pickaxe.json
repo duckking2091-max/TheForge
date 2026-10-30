@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9024,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_pickaxe"
+        }
+      },
+      {
+        "threshold": 9025,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_pickaxe"
+        }
+      },
+      {
+        "threshold": 9033,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_pickaxe"
+        }
+      },
+      {
+        "threshold": 9034,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_pickaxe"
+        }
+      },
+      {
+        "threshold": 9042,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_pickaxe"
+        }
+      },
+      {
+        "threshold": 9043,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_pickaxe"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_pickaxe"
+    }
+  }
+}

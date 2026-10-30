@@ -1,0 +1,172 @@
+# The Forging Starter - the in-game The Forge guide (refined edition).
+# Edit freely: each chapter has a title, a colour and a list of sections. A section is usually
+# "<b>HEADING</b><newline>text". MiniMessage formatting works: <b>bold</b>, <gold>colour</gold>, <newline>.
+# Pages are laid out automatically (a section never splits mid-sentence unless it is longer than a page).
+# {file:path} is replaced with the live setting, e.g. {materials:generation.siftie.min-y}.
+# Optional maths and fallback: {villagers:miner.interval-seconds/60}  {villagers:miner.restocks-per-day|2}
+# Changes show up the next time a player opens the book (or after /forge reload for the settings).
+cover: "<newline><b><gold>THE FORGING<newline>STARTER</gold></b><newline><newline><dark_gray>A field guide to</dark_gray><newline><b><dark_gray>THE FORGE</dark_gray></b><newline><newline><gray>Rare ores. New magic.<newline>Legendary equipment.</gray><newline><newline><dark_gray>Your journey begins<newline>here.</dark_gray><newline><newline><gray>Turn the page ></gray>"
+chapters:
+  - title: "Welcome to The Forge"
+    theme: welcome   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Welcome"   # name on the contents page
+    color: gold
+    text:
+      - "<gold><b>THE ADVENTURE</b></gold><newline>The Forge brings rare materials, three equipment tiers, a custom Forging Anvil, elemental magic, two new villagers and the Legendary Scythe."
+      - "<gold><b>THE UPGRADE PATH</b></gold><newline>Diamond > Netherite > <aqua>Siftie</aqua> > <light_purple>Enderite</light_purple> > <dark_aqua>Wardenite</dark_aqua>. Each tier upgrades the one before it at the Forging Anvil. [figure:progression]"
+      - "<gold><b>YOUR FIRST STEPS</b></gold><newline>1. Obtain diamond and netherite gear.<newline>2. Meet a Miner and buy the Book of Forging.<newline>3. Craft your Forging Anvil."
+      - "<gold><b>THE JOURNEY AHEAD</b></gold><newline>4. Mine Siftie deep in the Overworld.<newline>5. Upgrade, then seek Enderite in the outer End.<newline>6. Defeat Wardens for Wardenite."
+      - "<gold><b>BEYOND THE FORGE</b></gold><newline>Find a Magician for elemental magic books. When you are ready, perform the Dark Ritual to create the Legendary Scythe."
+  - title: "The Miner"
+    theme: miner   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "The Miner"   # name on the contents page
+    color: yellow
+    text:
+      - "[figure:miner]"
+      - "<gold><b>MEET THE MINER</b></gold><newline>Look for the <gold>Wandering Miner</gold>: brown overalls, a lantern hat and a backpack. Right-click to trade."
+      - "<gold><b>WHEN HE APPEARS</b></gold><newline>Every {villagers:miner.interval-seconds/60} minutes, a player who stayed within {villagers:miner.stability-radius} blocks of one spot for {villagers:miner.stability-seconds/60} minutes may attract a Miner."
+      - "<gold><b>SPAWN CHANCES</b></gold><newline>Base chance: {villagers:miner.base-chance*100}%. Add {villagers:miner.villager-bonus*100}% for each villager within {villagers:miner.population-radius} blocks. Staying near a village helps."
+      - "<gold><b>SPAWN LIMITS</b></gold><newline>No more than {villagers:miner.max-active} Miners at once, and never two within {villagers:miner.duplicate-radius} blocks. Each Miner leaves after {villagers:miner.despawn-seconds/60} minutes."
+      - "<gold><b>TWELVE TRADES</b></gold><newline>Each Miner offers {villagers:miner.offers.minerals|9} mineral trades, {villagers:miner.offers.pickaxes|2} enchanted pickaxes and 1 guaranteed Book of Forging. [figure:miner_trades]"
+      - "<gold><b>METAL TRADES</b></gold><newline>Iron, gold and copper are bought or sold as ingots or raw metal, {villagers:miner.offers.quantity-min|1}-{villagers:miner.offers.quantity-max|5} items per trade. Never ore blocks. At least one offer sells metal."
+      - "<gold><b>OTHER MINERALS</b></gold><newline>He also trades coal, redstone, lapis, diamonds, amethyst and quartz as items. No mineral appears twice."
+      - "<gold><b>ENCHANTED TOOLS</b></gold><newline>Two random pickaxes: stone, iron, gold or diamond. Diamond is rarest. Enchants may include Efficiency, Unbreaking, Fortune, Silk Touch or Mending."
+      - "<gold><b>RESTOCKING</b></gold><newline>Offers are rolled once when he arrives and stay the same. He restocks every {villagers:miner.restock-seconds/60} minutes, up to {villagers:miner.restocks-per-day|2} times a day."
+      - "<gold><b>A VITAL PURCHASE</b></gold><newline>The Book of Forging is always for sale: {villagers:miner.forging-book-emeralds} emeralds + 1 anvil. You need it to craft the Forging Anvil."
+  - title: "Ores and Materials"
+    theme: ores   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Ores & Materials"   # name on the contents page
+    color: green
+    text:
+      - "<aqua><b>SIFTIE • LOCATION</b></aqua><newline>Find Siftie in the Overworld between Y {materials:generation.siftie.min-y} and {materials:generation.siftie.max-y}. It is about as common as diamond ore and often appears on cave walls."
+      - "<aqua><b>SIFTIE • MINING</b></aqua><newline>Only new chunks contain it. Use a diamond pickaxe or better; weaker tools give no drop."
+      - "<aqua><b>SIFTIE • PROCESSING</b></aqua><newline>Siftie drops Raw Siftie. Fortune increases drops; Silk Touch preserves the ore. Smelt Raw Siftie in a furnace or blast furnace for an ingot. [figure:ore_siftie]"
+      - "<aqua><b>SIFTIE • HARDNESS</b></aqua><newline>An Efficiency V netherite pickaxe takes about {materials:mining-seconds.siftie} seconds to break Siftie ore."
+      - "<light_purple><b>ENDERITE • LOCATION</b></light_purple><newline>Search the outer End islands, at least {materials:generation.enderite.minimum-distance} blocks from the centre, from Y {materials:generation.enderite.min-y} to {materials:generation.enderite.max-y}."
+      - "<light_purple><b>ENDERITE • SEARCH</b></light_purple><newline>Enderite is buried inside End islands, much like ancient debris. Only about {materials:generation.enderite.surface-chance*100}% of chunks expose a tiny vein at the surface."
+      - "<light_purple><b>ENDERITE • MINING</b></light_purple><newline>Use a netherite pickaxe or better. Mining takes about {materials:mining-seconds.enderite} seconds with netherite or {materials:mining-seconds.enderite-with-siftie} with Siftie and above."
+      - "<light_purple><b>ENDERITE • ITEMS</b></light_purple><newline>Enderite drops Raw Enderite. Smelt it into an Enderite Ingot. Stack 2 ingots vertically in a crafting grid to make an Enderite Stick. [figure:ore_enderite]"
+      - "[figure:recipe_enderite_stick]"
+      - "<dark_aqua><b>WARDENITE • SOURCE</b></dark_aqua><newline>There is no Wardenite ore. Every defeated Warden drops {materials:drops.wardenite-scrap.looting-0} Wardenite Scrap, or up to {materials:drops.wardenite-scrap.looting-3} with Looting III."
+      - "<dark_aqua><b>WARDENITE • CRAFTING</b></dark_aqua><newline>Surround 1 Echo Shard with 8 Wardenite Scrap to craft a Wardenite Ingot. [figure:recipe_wardenite_ingot]"
+      - "<dark_aqua><b>WARDENITE • TEMPLATE</b></dark_aqua><newline>Find the Wardenite upgrade template in Ancient City chests ({materials:loot.wardenite-template-chance*100}% of chests). It cannot be crafted."
+  - title: "The Forging Anvil"
+    theme: forging   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Forging Anvil"   # name on the contents page
+    color: aqua
+    text:
+      - "[figure:anvil]"
+      - "<dark_aqua><b>CRAFT THE ANVIL</b></dark_aqua><newline>Craft it on a crafting table: [figure:recipe_anvil]"
+      - "<dark_aqua><b>OPEN THE FORGE</b></dark_aqua><newline>Place it like an anvil and right-click. Use the bottom tabs to switch between Forging, Upgrading and Dark Ritual."
+      - "<dark_aqua><b>THE FORGING SLOTS</b></dark_aqua><newline>Place the item to keep in slot 1 and the second item in slot 2. The result appears at the right. Click it to forge. [figure:forge_slots]"
+      - "<dark_aqua><b>MERGE ENCHANTS</b></dark_aqua><newline>Put matching equipment or an enchanted book in slot 2. The higher enchantment level wins. Cost: {config:forging.experience-levels} XP levels."
+      - "<dark_aqua><b>SPECIAL RULE</b></dark_aqua><newline>Unlike a normal anvil, this forge can combine conflicting enchantments on one item."
+      - "<dark_aqua><b>REPAIR EQUIPMENT</b></dark_aqua><newline>Use the matching material in slot 2 (e.g. a Siftie Ingot for Siftie gear). Each material restores 25% durability and costs 1 level."
+      - "<dark_aqua><b>COMBINE TWO ITEMS</b></dark_aqua><newline>Two damaged copies of the same item combine their durability plus 12%. Cost: 2 XP levels."
+      - "<dark_aqua><b>EXTRACT ENCHANTS</b></dark_aqua><newline>Put an enchanted item first and plain books second. Choose which enchantments to move onto a book. Cost: {config:forging.extraction-levels} levels."
+      - "<dark_aqua><b>SAFE FORGING</b></dark_aqua><newline>Forging is instant. If you lack XP, nothing is spent. Closing returns items; if your inventory is full they arrive as soon as you make room."
+      - "<dark_aqua><b>RENAME ITEMS</b></dark_aqua><newline>The name-tag button opens a normal anvil for renaming."
+      - "<dark_aqua><b>FORGING EXAMPLE</b></dark_aqua><newline>Siftie Sword (Sharpness V) + enchanted book (Looting III) = one sword with both enchantments. Cost: {config:forging.experience-levels} levels."
+  - title: "Upgrade Gear"
+    theme: upgrade   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Upgrade Gear"   # name on the contents page
+    color: blue
+    text:
+      - "<blue><b>OPEN THE TAB</b></blue><newline>Open the Forging Anvil and select Upgrading (the template icon)."
+      - "<blue><b>THREE INPUTS</b></blue><newline>From left to right:<newline>1. Upgrade template<newline>2. Gear to upgrade<newline>3. Matching ingot<newline>The result appears after the arrow."
+      - "<blue><b>UPGRADE • I</b></blue><newline>Diamond gear + Netherite Template + Netherite Ingot = Netherite gear. [figure:upgrade_netherite]"
+      - "<blue><b>UPGRADE • II</b></blue><newline>Netherite gear + Siftie Template + Siftie Ingot = Siftie gear. [figure:upgrade_siftie]"
+      - "<blue><b>UPGRADE • III</b></blue><newline>Siftie gear + Enderite Template + Enderite Ingot = Enderite gear. [figure:upgrade_enderite]"
+      - "<blue><b>UPGRADE • IV</b></blue><newline>Enderite gear + Wardenite Template + Wardenite Ingot = Wardenite gear. [figure:upgrade_wardenite]"
+      - "<blue><b>SIFTIE TEMPLATE</b></blue><newline>4 Siftie Ingots, 4 Blaze Rods, 1 Netherite Template. [figure:recipe_siftie_template]"
+      - "<blue><b>ENDERITE TEMPLATE</b></blue><newline>Craft it with 4 Raw Enderite around a Siftie Template. [figure:recipe_enderite_template]"
+      - "<blue><b>WARDENITE TEMPLATE</b></blue><newline>Find it in Ancient City chests. You cannot craft it. [figure:templates]"
+      - "<blue><b>WHAT YOU CAN UPGRADE</b></blue><newline>Swords, pickaxes, axes, shovels, hoes, spears, helmets, chestplates, leggings and boots all work."
+      - "<blue><b>LEVEL COSTS</b></blue><newline>Netherite: {materials:upgrades.netherite} levels<newline>Siftie: {materials:upgrades.siftie} levels<newline>Enderite: {materials:upgrades.enderite} levels<newline>Wardenite: {materials:upgrades.wardenite} levels<newline>The template, ingot and XP are consumed."
+      - "<blue><b>THREE SECONDS</b></blue><newline>Upgrading takes {config:forging.animation-seconds} seconds. Enchantments, custom name and remaining durability percentage carry over. Close early to get all items back."
+      - "<blue><b>AN UPGRADE EXAMPLE</b></blue><newline>Netherite Pickaxe + Siftie Template + Siftie Ingot + {materials:upgrades.siftie} levels = Siftie Pickaxe with the same enchantments."
+      - "<blue><b>BACKGROUND ART</b></blue><newline>The Overworld, End and Deep Dark pictures behind the slots are decorative, not extra upgrade stages."
+  - title: "Dark Ritual"
+    theme: ritual   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Dark Ritual"   # name on the contents page
+    color: light_purple
+    text:
+      - "<dark_purple><b>THE RITUAL</b></dark_purple><newline>The Dark Ritual creates the Legendary Scythe. Open it with the scythe icon in the Forging Anvil."
+      - "[figure:ritual_layout]"
+      - "<dark_purple><b>THE EIGHT ITEMS • I</b></dark_purple><newline>Place one in each labelled slot:<newline>• Any elemental or Darkness Book<newline>• Wardenite Ingot<newline>• Enderite Stick<newline>• Dragon's Heart"
+      - "<dark_purple><b>THE EIGHT ITEMS • II</b></dark_purple><newline>Also place:<newline>• Echo Shard<newline>• Warden's Heart<newline>• Bat Wing<newline>• Netherite Ingot"
+      - "<dark_purple><b>FINDING HEARTS</b></dark_purple><newline>Dragon's Heart: Ender Dragon drop ({scythe:drops.dragon-heart*100}%).<newline>Warden's Heart: Warden drop ({scythe:drops.warden-heart*100}%).<newline>Bat Wing: Bat drop ({scythe:drops.bat-wing*100}%). [figure:ritual_drops]"
+      - "<dark_purple><b>START THE RITUAL</b></dark_purple><newline>Click Confirm. The ritual takes {scythe:ritual-duration} seconds and costs {scythe:ritual-experience-levels|0} XP levels. Closing early returns all ingredients."
+      - "<dark_purple><b>ONE LEGEND</b></dark_purple><newline>Only {scythe:maximum-scythes} Legendary Scythe can exist on the server. While the limit is reached, hearts and wings stop dropping."
+  - title: "The Magician"
+    theme: magician   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "The Magician"   # name on the contents page
+    color: yellow
+    text:
+      - "[figure:magician]"
+      - "<gold><b>MEET THE MAGICIAN</b></gold><newline>Look for a villager named <light_purple>Magician</light_purple>, wearing a purple wizard robe and hat."
+      - "<gold><b>BECOMING A MAGICIAN</b></gold><newline>An adult villager with no profession and no previous trades becomes a Magician within {villagers:magician.claim-radius} blocks of an enchanting table. Each table supports just one."
+      - "<gold><b>THE FOUR BOOKS</b></gold><newline>Every Magician is different: each level unlocks one random book, so all four are for sale by level 4.<newline>Fire {villagers:magician.trades.fire_book.emeralds}, Water {villagers:magician.trades.water_book.emeralds}, Earth {villagers:magician.trades.earth_book.emeralds}, Wind {villagers:magician.trades.wind_book.emeralds} emeralds. [figure:books]"
+      - "<gold><b>OTHER TRADES</b></gold><newline>Each level also adds one random extra: XP bottles, lapis, an Unbreaking book, ender pearls or amethyst. Echo shards only at level 5. A new Magician has exactly 2 trades."
+      - "<gold><b>TRADING XP</b></gold><newline>Trading raises the Magician's level. He reaches levels 2, 3, 4 and 5 at {villagers:magician.level-xp} trading XP."
+      - "<gold><b>RESTOCK & JOB</b></gold><newline>He restocks every {villagers:magician.restock-seconds/60} minutes, at most {villagers:magician.restocks-per-day} times a day, while working at his enchanting table."
+      - "<gold><b>LOSING THE TABLE</b></gold><newline>Before any trade, breaking the table returns him to a normal villager. After trading, he keeps the job and searches for another table."
+      - "<gold><b>THE FIFTH BOOK</b></gold><newline>The Darkness Book is never sold. Craft it from the Fire, Water, Earth and Wind books. [figure:recipe_darkness_book]"
+  - title: "Elemental Magic"
+    theme: magic   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Elemental Magic"   # name on the contents page
+    color: red
+    text:
+      - "<red><b>CASTING SPELLS</b></red><newline>Hold a magic book in your main hand.<newline>Right-click: spell 1<newline>Sneak + right-click: spell 2<newline>Sneak + left-click: spell 3"
+      - "<red><b>SPELLS & PASSIVES</b></red><newline>The action bar shows the spell and cooldown. Books carried in your inventory (not in chests) also grant passive abilities."
+      - "<red><b>FIRE BOOK</b></red><newline>1. Fire Field: real fire from {magic:books.fire.primary.safe-radius|2} to {magic:books.fire.primary.radius|5} blocks around you, {magic:books.fire.primary.cooldown}s cooldown.<newline>2. Fire Ring: {magic:books.fire.secondary.duration}s, {magic:books.fire.secondary.cooldown}s cooldown.<newline>3. Fireball: burns targets 10s, {magic:books.fire.third.cooldown}s cooldown."
+      - "<red><b>FIRE PASSIVE</b></red><newline>Immune to fire and lava. Animal drops are cooked."
+      - "<blue><b>WATER BOOK</b></blue><newline>1. Bubble Launch: {magic:books.water.primary.cooldown}s cooldown.<newline>2. Summon {magic:books.water.secondary.count} Drowned allies for {magic:books.water.secondary.duration}s: {magic:books.water.secondary.cooldown}s cooldown.<newline>3. Water Strike: hold Shift to aim water from within 5 blocks, release to throw. {magic:books.water.third.cooldown}s cooldown."
+      - "<blue><b>WATER PASSIVE</b></blue><newline>You cannot drown and you swim faster."
+      - "<dark_green><b>EARTH BOOK</b></dark_green><newline>1. Dig a {magic:books.earth.primary.size}x{magic:books.earth.primary.size} hole; it refills after {magic:books.earth.primary.duration}s.<newline>2. Raise a {magic:books.earth.secondary.wall-width|9}x{magic:books.earth.secondary.wall-height|7} stone wall for {magic:books.earth.secondary.duration}s; {magic:books.earth.secondary.cooldown}s cooldown."
+      - "<dark_green><b>EARTH PASSIVE</b></dark_green><newline>Gain Haste II while the book is carried in your inventory."
+      - "<dark_aqua><b>WIND BOOK</b></dark_aqua><newline>1. Fly for {magic:books.wind.primary.duration}s: {magic:books.wind.primary.cooldown}s cooldown.<newline>2. Suffocation ring: {magic:books.wind.third.cooldown}s cooldown.<newline>3. Wind Charge: {magic:books.wind.secondary.cooldown}s cooldown."
+      - "<dark_aqua><b>WIND PASSIVE</b></dark_aqua><newline>Take no fall damage while the book is carried in your inventory."
+      - "<dark_purple><b>DARKNESS BOOK</b></dark_purple><newline>1. Blind nearby targets: {magic:books.darkness.primary.cooldown}s cooldown.<newline>2. Summon {magic:books.darkness.secondary.count} Wither Skeletons for {magic:books.darkness.secondary.duration}s: {magic:books.darkness.secondary.cooldown}s cooldown.<newline>3. Darkness Breath (dragon fireball): {magic:books.darkness.third.cooldown}s cooldown."
+      - "<dark_purple><b>DARKNESS PASSIVE</b></dark_purple><newline>The Darkness Book grants the passives of all four elemental books."
+      - "<red><b>COMBAT RULES</b></red><newline>Spells can hurt mobs and players, but respect PvP, teams and protected areas. Summons drop no loot or XP; temporary blocks are restored."
+  - title: "Gear & Weapons"
+    theme: gear   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Gear & Weapons"   # name on the contents page
+    color: red
+    text:
+      - "<red><b>GEAR FOR EVERY TIER</b></red><newline>Upgrades apply to swords, pickaxes, axes, shovels, hoes, spears and all four armour pieces. See Upgrade Gear for recipes."
+      - "<aqua><b>SIFTIE EQUIPMENT</b></aqua><newline>Sword: {materials:tiers.siftie.sword-damage} damage.<newline>Tools: {materials:tiers.siftie.tool-durability} durability, {materials:tiers.siftie.mining-speed}x netherite mining speed.<newline>Chestplate armour: {materials:tiers.siftie.armor-points.chestplate}. Toughness: {materials:tiers.siftie.armor-toughness}. [figure:gear_siftie]"
+      - "<light_purple><b>ENDERITE EQUIPMENT</b></light_purple><newline>Sword: {materials:tiers.enderite.sword-damage} damage.<newline>Tools: {materials:tiers.enderite.tool-durability} durability.<newline>Pickaxe: {materials:tiers.enderite.mining-speed.pickaxe}x mining speed.<newline>Toughness: {materials:tiers.enderite.armor-toughness}. [figure:gear_enderite]"
+      - "<light_purple><b>ENDERITE PERK</b></light_purple><newline>Wearing Enderite armour reduces damage from ender pearls by {materials:armor-perks.ender-pearl-reduction*100}%."
+      - "<dark_aqua><b>WARDENITE EQUIPMENT</b></dark_aqua><newline>Sword: {materials:tiers.wardenite.sword-damage} damage.<newline>Tools: {materials:tiers.wardenite.tool-durability} durability.<newline>Pickaxe: {materials:tiers.wardenite.mining-speed.pickaxe}x mining speed.<newline>Armour: {materials:tiers.wardenite.armor-points.chestplate}. Toughness: {materials:tiers.wardenite.armor-toughness}. [figure:gear_wardenite]"
+      - "<dark_aqua><b>WARDENITE PERKS</b></dark_aqua><newline>Wardenite armour cuts Warden sonic boom damage by {materials:armor-perks.sonic-boom-reduction*100}% and keeps the Enderite armour perk. Item tooltips show exact stats."
+      - "<dark_purple><b>LEGENDARY SCYTHE</b></dark_purple><newline>Only from the Dark Ritual. {scythe:durability} durability.<newline>1. Dash {scythe:dash.distance} blocks, {scythe:dash.damage} damage ({scythe:dash.cooldown}s).<newline>2. Fly {scythe:flight.duration}s ({scythe:flight.cooldown}s).<newline>3. Windmill, {scythe:windmill.damage} damage ({scythe:windmill.cooldown}s)."
+      - "<dark_purple><b>REPAIR THE SCYTHE</b></dark_purple><newline>Use a Wardenite Ingot in the Forging tab to restore {scythe:repair-fraction*100}% durability per ingot."
+      - "<gold><b>BLAST ENCHANTMENT</b></gold><newline>Enchant pickaxes or shovels at an enchanting table. Blast I: 3x3x1. Blast II: 3x3x2. Blast III: 3x3x3. Sneak for one block."
+  - title: "Tips and Progression"
+    theme: tips   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Tips & Progress"   # name on the contents page
+    color: gold
+    text:
+      - "<gold><b>PREPARE FOR MINING</b></gold><newline>Bring a diamond pickaxe or better for Siftie; netherite or better for Enderite. Fortune yields more raw material."
+      - "<gold><b>EXPLORE NEW CHUNKS</b></gold><newline>Siftie and Enderite only appear in newly generated chunks. Explore territory you have not visited."
+      - "<gold><b>ENCHANT BEFOREHAND</b></gold><newline>Enchant your netherite gear before upgrading. Each tier preserves its enchantments."
+      - "<gold><b>FIND A MINER</b></gold><newline>Stay near one spot, ideally close to a village, to improve your chance of seeing a Miner. Save emeralds for the Book of Forging."
+      - "<gold><b>PROTECT YOUR LOOT</b></gold><newline>Templates are valuable, especially Wardenite. Check the input gear, template and ingot before confirming."
+      - "<gold><b>KEEP BOOKS CLOSE</b></gold><newline>Elemental books give passive abilities when carried in your inventory."
+      - "<gold><b>ADVENTURER CHECKLIST</b></gold><newline>[ ] Diamond & netherite gear<newline>[ ] Book of Forging<newline>[ ] Forging Anvil<newline>[ ] Siftie gear<newline>[ ] Enderite gear<newline>[ ] Wardenite gear<newline>[ ] Every magic book<newline>[ ] Legendary Scythe"
+  - title: "Questions"
+    theme: faq   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
+    short: "Questions"   # name on the contents page
+    color: gold
+    text:
+      - "<gold><b>CAN'T FIND SIFTIE?</b></gold><newline>Mine in new Overworld chunks from Y {materials:generation.siftie.min-y} to {materials:generation.siftie.max-y} with a diamond pickaxe or better."
+      - "<gold><b>CAN'T FIND ENDERITE?</b></gold><newline>Travel at least {materials:generation.enderite.minimum-distance} blocks from the End's centre, then mine inside outer islands."
+      - "<gold><b>NO MINER IN SIGHT?</b></gold><newline>Remain near one location for {villagers:miner.stability-seconds/60} minutes. A spawn attempt may occur every {villagers:miner.interval-seconds/60} minutes; nearby villagers improve the chance."
+      - "<gold><b>NEED WARDENITE?</b></gold><newline>Defeat Wardens for scrap. Find the Wardenite upgrade template in Ancient City chests."
+      - "<gold><b>FORGING WON'T WORK?</b></gold><newline>Check your XP levels and item compatibility. Place only one item in the first slot."
+      - "<gold><b>UPGRADE WON'T WORK?</b></gold><newline>Use the exact previous equipment tier with its matching template and ingot."
+      - "<gold><b>WHERE ARE THE BOOKS?</b></gold><newline>Buy elemental books from a Magician. Craft Darkness from all four elemental books."
+      - "<gold><b>RITUAL WON'T START?</b></gold><newline>Fill every labelled ingredient slot and check whether the server already has its maximum number of scythes."
+      - "<gold><b>WHERE IS THE BOOK?</b></gold><newline>Buy the Book of Forging from the Miner. Lost this Starter guide? Use /forge guide. [figure:recipe_guide]"

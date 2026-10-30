@@ -1,0 +1,41 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_scrap"
+        }
+      },
+      {
+        "threshold": 9007,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_scrap"
+        }
+      },
+      {
+        "threshold": 9011,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_scrap"
+        }
+      },
+      {
+        "threshold": 9012,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_scrap"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_scrap"
+    }
+  }
+}

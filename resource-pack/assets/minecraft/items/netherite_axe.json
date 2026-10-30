@@ -1,0 +1,55 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9025,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_axe"
+        }
+      },
+      {
+        "threshold": 9026,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_axe"
+        }
+      },
+      {
+        "threshold": 9034,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_axe"
+        }
+      },
+      {
+        "threshold": 9035,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_axe"
+        }
+      },
+      {
+        "threshold": 9043,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_axe"
+        }
+      },
+      {
+        "threshold": 9044,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_axe"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_axe"
+    }
+  }
+}

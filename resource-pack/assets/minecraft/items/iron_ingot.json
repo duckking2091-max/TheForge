@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9003,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_ingot"
+        }
+      },
+      {
+        "threshold": 9004,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/iron_ingot"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/iron_ingot"
+    }
+  }
+}

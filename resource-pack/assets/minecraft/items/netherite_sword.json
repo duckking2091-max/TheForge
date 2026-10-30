@@ -1,0 +1,62 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 9022,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/legendary_scythe"
+        }
+      },
+      {
+        "threshold": 9023,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/siftie_sword"
+        }
+      },
+      {
+        "threshold": 9024,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_sword"
+        }
+      },
+      {
+        "threshold": 9032,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/enderite_sword"
+        }
+      },
+      {
+        "threshold": 9033,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_sword"
+        }
+      },
+      {
+        "threshold": 9041,
+        "model": {
+          "type": "minecraft:model",
+          "model": "blastforge:item/wardenite_sword"
+        }
+      },
+      {
+        "threshold": 9042,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/netherite_sword"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_sword"
+    }
+  }
+}

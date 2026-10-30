@@ -1,0 +1,7 @@
+target/
+release/
+__pycache__/
+*.pyc
+.idea/
+*.iml
+.vscode/

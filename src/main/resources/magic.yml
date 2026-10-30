@@ -1,0 +1,40 @@
+enabled: true
+# Show "1. ability + cooldown | 2. ... | 3. ..." above the health bar while a book or the scythe is held.
+cooldown-display: true
+pvp: true
+particle-intensity: 1.0
+target-passive-mobs: false
+fireball-block-damage: false
+books:
+  fire:
+    # 1. Fire Field: real fire on the ground from safe-radius to radius around the caster, removed after fire-seconds.
+    primary: {cooldown: 45, damage: 8, safe-radius: 2, radius: 5, fire-seconds: 5}
+    # 2. Fire Ring: enemies inside take damage each second; leaving it keeps them burning 3 seconds.
+    secondary: {cooldown: 90, duration: 5, damage: 2, radius: 3}
+    # 3. Fireball: a real fireball (speed, power = explosion size, no block damage); whoever it hits burns 10 seconds.
+    third: {cooldown: 60, speed: 1.2, power: 1}
+  water:
+    primary: {cooldown: 30}
+    secondary: {cooldown: 90, duration: 60, count: 3}
+    # 3. Water Strike: needs water within 5 blocks; hold Shift to aim it, release Shift to throw. The hit target drowns for duration seconds.
+    third: {cooldown: 60, duration: 5, damage: 2}
+  earth:
+    primary: {cooldown: 0, size: 3, duration: 10}
+    # 2. Stone Wall: wall-width x wall-height, 1 thick. Optional block: STONE (default: stone / blackstone / end stone bricks per dimension).
+    secondary: {cooldown: 60, duration: 5, wall-width: 9, wall-height: 7}
+  wind:
+    primary: {cooldown: 45, duration: 20}
+    # Controls: 1 = right-click Flight, 2 = sneak + right-click Suffocation ("third" below), 3 = sneak + left-click Wind Charge ("secondary").
+    secondary: {cooldown: 30}
+    third: {cooldown: 90, radius: 2, duration: 5, damage: 2}
+  darkness:
+    primary: {cooldown: 60, radius: 3, duration: 30}
+    secondary: {cooldown: 120, duration: 10, count: 3}
+    # 3. Darkness Breath: a real Ender Dragon fireball with its lingering breath cloud (vanilla damage; damage is unused).
+    third: {cooldown: 90, damage: 6}
+temporary-blocks:
+  max-per-player: 512
+  work-per-tick: 128
+flight:
+  # Permit flight only for the duration; honor permissions granted by other plugins.
+  external-permission: essentials.fly
