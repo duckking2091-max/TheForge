@@ -1,0 +1,20 @@
+{
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "minecraft:item/stick"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9010
+   },
+   "model": "blastforge:item/enderite_stick"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9011
+   },
+   "model": "minecraft:item/stick"
+  }
+ ]
+}

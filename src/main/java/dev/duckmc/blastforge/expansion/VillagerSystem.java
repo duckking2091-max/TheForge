@@ -118,7 +118,7 @@ public final class VillagerSystem implements Listener,AutoCloseable {
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void naturalRestock(VillagerReplenishTradeEvent event){if(!kind(event.getEntity()).isEmpty()&&!restocking)event.setCancelled(true);}
     private boolean restocking;
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void guardTrade(PlayerTradeEvent event){
-        if(kind(event.getMerchant()).isEmpty())return;State state=states.get(event.getMerchant().getUniqueId());if(state==null||state.kind.equals("miner")&&state.expires<=System.currentTimeMillis()){event.setCancelled(true);return;}
+        if(kind(event.getVillager()).isEmpty())return;State state=states.get(event.getVillager().getUniqueId());if(state==null||state.kind.equals("miner")&&state.expires<=System.currentTimeMillis()){event.setCancelled(true);return;}
         if(!(event.getPlayer().getOpenInventory().getTopInventory() instanceof MerchantInventory inventory)){event.setCancelled(true);return;}
         if(!ordinaryInputs(inventory,event.getTrade())){event.setCancelled(true);event.getPlayer().sendMessage(Component.text("This merchant accepts ordinary items only.",NamedTextColor.YELLOW));}
     }
@@ -129,9 +129,9 @@ public final class VillagerSystem implements Listener,AutoCloseable {
         return state.offers.stream().anyMatch(o->o.recipe().getResult().isSimilar(trade.getResult())&&o.recipe().getIngredients().equals(trade.getIngredients()));
     }
     @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void traded(PlayerTradeEvent event){
-        State state=states.get(event.getMerchant().getUniqueId());if(state==null||event.isCancelled())return;long marker=pendingTrades.merge(state.id,1L,Long::sum);
-        plugin.getServer().getScheduler().runTask(plugin,()->{if(event.isCancelled()||!event.getMerchant().isValid()||!states.containsKey(state.id)||pendingTrades.getOrDefault(state.id,0L)!=marker)return;
-            AbstractVillager merchant=event.getMerchant();boolean used=false;var changed=new ArrayList<VillagerOffers.Offer>();for(int i=0;i<state.offers.size();i++){var offer=state.offers.get(i);MerchantRecipe recipe=i<merchant.getRecipeCount()?merchant.getRecipe(i):offer.recipe();if(recipe.getUses()>offer.recipe().getUses())used=true;changed.add(new VillagerOffers.Offer(offer.id(),offer.level(),VillagerOffers.copy(recipe)));}
+        State state=states.get(event.getVillager().getUniqueId());if(state==null||event.isCancelled())return;long marker=pendingTrades.merge(state.id,1L,Long::sum);
+        plugin.getServer().getScheduler().runTask(plugin,()->{if(event.isCancelled()||!event.getVillager().isValid()||!states.containsKey(state.id)||pendingTrades.getOrDefault(state.id,0L)!=marker)return;
+            AbstractVillager merchant=event.getVillager();boolean used=false;var changed=new ArrayList<VillagerOffers.Offer>();for(int i=0;i<state.offers.size();i++){var offer=state.offers.get(i);MerchantRecipe recipe=i<merchant.getRecipeCount()?merchant.getRecipe(i):offer.recipe();if(recipe.getUses()>offer.recipe().getUses())used=true;changed.add(new VillagerOffers.Offer(offer.id(),offer.level(),VillagerOffers.copy(recipe)));}
             int experience=merchant instanceof Villager v?v.getVillagerExperience():state.xp;if(experience>state.xp)used=true;if(!used)return;state.offers=changed;state.locked=true;state.xp=experience;
             if(merchant instanceof Villager v&&state.kind.equals("magician")){int level=1;int[] defaults={10,70,150,250};List<Integer> thresholds=cfg().getIntegerList("magician.level-xp");for(int i=0;i<4;i++)if(state.xp>=(thresholds.size()>i?thresholds.get(i):defaults[i]))level=i+2;
                 if(level!=state.level){state.level=level;var merged=new ArrayList<VillagerOffers.Offer>(state.offers);for(var offer:new VillagerOffers(items,cfg()).magician(level,state.seed))if(merged.stream().noneMatch(old->old.id().equals(offer.id())))merged.add(offer);state.offers=merged;   /* level-ups only add offers */closeTrader(merchant);apply(v,state);}}

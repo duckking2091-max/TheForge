@@ -1,16 +1,27 @@
-# The Forge 1.0.1 — player and server guide
+# The Forge 1.1.0 — player and server guide
 
-Target: Paper 1.21.11 (Java 21+). Other Minecraft versions, Spigot and Folia are not supported.
+Target: Paper 1.21.0 – 1.21.11 (Java 21+). Spigot and Folia are not supported.
 Players also get this information in-game: new players receive **The Forging Starter**, an illustrated two-page
 guide book (craft another with a book + an iron ingot, or use `/forge guide`).
+
+### Supported versions
+The Forge runs on **every Paper 1.21.x server, from 1.21.0 to 1.21.11**, and its single resource pack works on every
+1.21.x client. A few features need a newer Minecraft and are simply skipped on older ones:
+
+| Feature | Needs |
+|---|---|
+| Spears (Siftie / Enderite / Wardenite) | 1.21.11 |
+| Wardenite helmet 3D model, the flying water block in Water Strike | 1.21.4+ (older: normal Wardenite armour / a glass block) |
+| Custom armour looks for Siftie, Enderite and Wardenite | 1.21.2+ (older: netherite look; stats are the same) |
+| Blast offered by enchanting tables | most 1.21 builds (the very first ones: librarian books only) |
 
 ## Install or update
 
 1. Stop the server and back up the worlds and `plugins/TheForge` together.
-2. Keep one The Forge JAR in `plugins` (`TheForge-1.0.1.jar`).
-3. Start Paper 1.21.11. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
+2. Keep one The Forge JAR in `plugins` (`TheForge-1.1.0.jar`).
+3. Start Paper 1.21.x. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
    Never delete the database when editing settings.
-4. Resource pack: host `TheForge-1.21.11-pack.zip` at a direct link and set `resource-pack` and
+4. Resource pack: host `TheForge-pack.zip` at a direct link and set `resource-pack` and
    `resource-pack-sha1` in `server.properties` (see the README). With `resource-pack.url` empty in `config.yml`,
    The Forge uses the server's pack. `assume-installed: true` (default) shows the custom screens to everyone.
    When you update the pack, change only the link and SHA-1 in `server.properties`.

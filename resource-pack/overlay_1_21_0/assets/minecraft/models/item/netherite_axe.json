@@ -1,0 +1,44 @@
+{
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "minecraft:item/netherite_axe"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9025
+   },
+   "model": "blastforge:item/siftie_axe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9026
+   },
+   "model": "minecraft:item/netherite_axe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9034
+   },
+   "model": "blastforge:item/enderite_axe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9035
+   },
+   "model": "minecraft:item/netherite_axe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9043
+   },
+   "model": "blastforge:item/wardenite_axe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9044
+   },
+   "model": "minecraft:item/netherite_axe"
+  }
+ ]
+}

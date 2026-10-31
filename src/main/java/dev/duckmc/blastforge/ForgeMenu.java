@@ -34,11 +34,31 @@ final class ForgeMenu implements Listener {
     void normalOperationsOnly(){normalOperationsOnly=true;}
     void open(Player player,Location location) {
         player.closeInventory();
-        var builder=MenuType.ANVIL.builder().title(Component.text("The Forging Anvil")).checkReachable(location!=null);
-        if(location!=null)builder.location(location);
-        AnvilView view=builder.build(player);
+        AnvilView view=nativeAnvil(player,location);
+        if(view==null)return;
         sessions.put(player.getUniqueId(),new Session(view,location));
-        player.openInventory(view);
+        if(player.getOpenInventory()!=view)player.openInventory(view);
+    }
+    /**
+     * A vanilla anvil screen titled "The Forging Anvil": through the menu builder on 1.21.4+, or the older
+     * openAnvil on 1.21.0-1.21.3 (the builder is looked up by name so the plugin also loads where it does not exist).
+     */
+    @SuppressWarnings("deprecation")
+    private static AnvilView nativeAnvil(Player player,Location location){
+        try{
+            Object anvil=Class.forName("org.bukkit.inventory.MenuType").getField("ANVIL").get(null);
+            Object builder=anvil.getClass().getMethod("builder").invoke(anvil);
+            Class<?> type=Class.forName("org.bukkit.inventory.view.builder.LocationInventoryViewBuilder");
+            builder=type.getMethod("title",Component.class).invoke(builder,Component.text("The Forging Anvil"));
+            builder=type.getMethod("checkReachable",boolean.class).invoke(builder,location!=null);
+            if(location!=null)builder=type.getMethod("location",Location.class).invoke(builder,location);
+            return (AnvilView)type.getMethod("build",org.bukkit.entity.HumanEntity.class).invoke(builder,player);
+        }catch(ReflectiveOperationException|LinkageError|ClassCastException newerApiMissing){
+            InventoryView opened=player.openAnvil(location,location==null);
+            if(opened==null)return null;
+            try{opened.setTitle("The Forging Anvil");}catch(RuntimeException ignored){}
+            return opened instanceof AnvilView anvil?anvil:null;
+        }
     }
     private boolean owns(InventoryView view) {
         Session session=sessions.get(view.getPlayer().getUniqueId());

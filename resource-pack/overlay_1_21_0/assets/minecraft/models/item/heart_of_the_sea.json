@@ -1,0 +1,20 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "minecraft:item/heart_of_the_sea"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9015
+   },
+   "model": "blastforge:item/warden_heart"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9016
+   },
+   "model": "minecraft:item/heart_of_the_sea"
+  }
+ ]
+}

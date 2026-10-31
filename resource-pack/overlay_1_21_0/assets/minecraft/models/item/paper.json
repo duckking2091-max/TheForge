@@ -1,0 +1,92 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "minecraft:item/paper"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9050
+   },
+   "model": "blastforge:item/anvil_hammer"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9051
+   },
+   "model": "blastforge:item/anvil_tools"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9052
+   },
+   "model": "blastforge:item/magician_robes"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9053
+   },
+   "model": "blastforge:item/miner_helmet"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9054
+   },
+   "model": "blastforge:item/miner_backpack"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9055
+   },
+   "model": "minecraft:item/paper"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9058
+   },
+   "model": "blastforge:item/magician_hat"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9059
+   },
+   "model": "blastforge:item/tab_forging"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9060
+   },
+   "model": "blastforge:item/tab_upgrading"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9061
+   },
+   "model": "blastforge:item/tab_ritual"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9062
+   },
+   "model": "blastforge:item/tab_rename"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9063
+   },
+   "model": "blastforge:item/tab_close"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9064
+   },
+   "model": "blastforge:item/guide_button"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9065
+   },
+   "model": "minecraft:item/paper"
+  }
+ ]
+}

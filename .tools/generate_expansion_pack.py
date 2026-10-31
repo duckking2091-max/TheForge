@@ -426,7 +426,7 @@ def item_model(id):
 
 def generate(client):
     entries=catalog();PACK.mkdir(parents=True,exist_ok=True);OUT.mkdir(parents=True,exist_ok=True);ART.mkdir(parents=True,exist_ok=True)
-    write_json(PACK/"pack.mcmeta",{"pack":{"description":"The Forge • Java 1.21.11","min_format":[75,0],"max_format":[75,0]}})
+    write_json(PACK/"pack.mcmeta",{"pack":{"description":"The Forge • Java 1.21.x","min_format":[75,0],"max_format":[75,0]}})
     icons={}
     for id,number,carrier in entries:
         icon=pixel_image(id);icons[id]=icon;save_image(PACK/f"assets/blastforge/textures/item/{id}.png",icon)
@@ -562,8 +562,16 @@ def validate(client,entries):
     for path in PACK.rglob("*.png"):
         with Image.open(path) as image:
             image.verify()
-    metadata=json.loads((PACK/"pack.mcmeta").read_text());assert metadata["pack"]["min_format"]==[75,0] and metadata["pack"]["max_format"]==[75,0]
-    assert "supported_formats" not in metadata["pack"]
+    # One pack for every 1.21.x client: formats 34 (1.21.0) to 75 (1.21.11), with version overlays (see legacy_pack.py)
+    metadata=json.loads((PACK/"pack.mcmeta").read_text());pack=metadata["pack"]
+    assert pack["pack_format"]==34 and pack["supported_formats"]==[34,75] and pack["min_format"]==34 and pack["max_format"]==75,pack
+    for overlay in metadata.get("overlays",{}).get("entries",[]):
+        assert (PACK/overlay["directory"]).is_dir() and overlay["formats"]==[overlay["min_format"],overlay["max_format"]],overlay
+        assert 34<=overlay["min_format"]<=overlay["max_format"]<=75,overlay
+    # classic overrides used by 1.21.0-1.21.3 must point at models that exist (vanilla trim models use their old names)
+    for path in PACK.glob("overlay_*/assets/*/models/item/*.json"):
+        for override in json.loads(path.read_text()).get("overrides",[]):
+            if "custom_model_data" in override["predicate"] and not exists(resolve(override["model"],"models")):errors.append("Missing legacy override model "+override["model"])
     for id,number,carrier in entries:
         data=json.loads((PACK/f"assets/minecraft/items/{carrier}.json").read_text());node=data["model"];assert any(e["threshold"]==number and e["model"]==item_model(id) for e in node["entries"])
         assert node["fallback"]==json.loads(client.read(f"assets/minecraft/items/{carrier}.json"))["model"]
@@ -579,8 +587,9 @@ def validate(client,entries):
 
 def repack(client,entries):
     """Validate then package existing editable JSON/PNG files; never regenerate art."""
+    import legacy_pack;legacy_pack.CLIENT=CLIENT;legacy_pack.main()   # overlays for 1.21.0-1.21.10 clients
     report=validate(client,entries);OUT.mkdir(parents=True,exist_ok=True)
-    archive=OUT/"TheForge-1.21.11-pack.zip";temporary=archive.with_suffix(".zip.tmp")
+    archive=OUT/"TheForge-pack.zip";temporary=archive.with_suffix(".zip.tmp")
     try:
         with zipfile.ZipFile(temporary,"w",zipfile.ZIP_DEFLATED,compresslevel=9) as z:
             for path in sorted(PACK.rglob("*")):
@@ -593,7 +602,7 @@ def repack(client,entries):
     finally:
         if temporary.exists():temporary.unlink()
     report["zip"]=str(archive);report["sha1"]=hashlib.sha1(archive.read_bytes()).hexdigest()
-    (OUT/"TheForge-1.21.11-pack.sha1").write_text(report["sha1"]+"\n")
+    (OUT/"TheForge-pack.sha1").write_text(report["sha1"]+"\n")
     write_json(OUT/"pack-validation.json",report)
     return report
 

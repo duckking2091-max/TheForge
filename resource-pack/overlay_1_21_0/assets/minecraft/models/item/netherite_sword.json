@@ -1,0 +1,50 @@
+{
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "minecraft:item/netherite_sword"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9022
+   },
+   "model": "blastforge:item/legendary_scythe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9023
+   },
+   "model": "blastforge:item/siftie_sword"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9024
+   },
+   "model": "minecraft:item/netherite_sword"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9032
+   },
+   "model": "blastforge:item/enderite_sword"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9033
+   },
+   "model": "minecraft:item/netherite_sword"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9041
+   },
+   "model": "blastforge:item/wardenite_sword"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9042
+   },
+   "model": "minecraft:item/netherite_sword"
+  }
+ ]
+}

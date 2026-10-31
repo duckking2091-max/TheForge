@@ -1,0 +1,20 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "minecraft:item/prismarine_crystals"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9002
+   },
+   "model": "blastforge:item/raw_siftie"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9003
+   },
+   "model": "minecraft:item/prismarine_crystals"
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "parent": "minecraft:block/deepslate_diamond_ore",
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9004
+   },
+   "model": "blastforge:item/siftie_ore"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9005
+   },
+   "model": "minecraft:block/deepslate_diamond_ore"
+  }
+ ]
+}

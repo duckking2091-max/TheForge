@@ -167,14 +167,14 @@ public final class MagicSystem implements Listener,AutoCloseable {
         // like vanilla: if creatures are close to the impact, the cloud is centred on the nearest one
         LivingEntity nearest=at.getWorld().getNearbyLivingEntities(at,4,2,4,t->!t.equals(caster)).stream().min(Comparator.comparingDouble(t->t.getLocation().distanceSquared(at))).orElse(null);
         Location center=nearest!=null?nearest.getLocation():at;
-        AreaEffectCloud cloud=at.getWorld().spawn(center,AreaEffectCloud.class,c->{c.setSource(caster);c.setParticle(Particle.DRAGON_BREATH,1f);c.setRadius(3);c.setDuration(600);
+        AreaEffectCloud cloud=at.getWorld().spawn(center,AreaEffectCloud.class,c->{c.setSource(caster);if(Particle.DRAGON_BREATH.getDataType()==Float.class)c.setParticle(Particle.DRAGON_BREATH,1f);else c.setParticle(Particle.DRAGON_BREATH);c.setRadius(3);c.setDuration(600);
             c.setRadiusPerTick((7f-3f)/600f);c.addCustomEffect(new PotionEffect(PotionEffectType.INSTANT_DAMAGE,1,1),true);
             c.getPersistentDataContainer().set(BREATH,PersistentDataType.STRING,caster.getUniqueId().toString());});
         at.getWorld().playEffect(at,org.bukkit.Effect.DRAGON_BREATH,0);
         if(!cloud.isValid())plugin.getLogger().warning("Darkness Breath cloud was blocked by another plugin at "+at.getBlockX()+" "+at.getBlockY()+" "+at.getBlockZ());
     }
     /** Mobs that Harming heals instead of hurting. */
-    static boolean undead(LivingEntity t){return Tag.ENTITY_TYPES_UNDEAD.isTagged(t.getType());}
+    static boolean undead(LivingEntity t){return dev.duckmc.blastforge.Compat.undead(t);}
     private final Map<UUID,Map<UUID,Integer>> breathHits=new HashMap<>();
     /**
      * Who the breath cloud may hurt: never its caster, players only with PvP, nothing inside protected regions.
@@ -228,7 +228,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         Block source=waterSource(p);
         if(source==null){p.sendActionBar(Component.text("No water within 5 blocks.",NamedTextColor.AQUA));return false;}
         Location from=source.getLocation().add(.5,.5,.5);if(!protection.canAffect(p,from) || heldWater.containsKey(p.getUniqueId()))return false;
-        ItemDisplay orb=from.getWorld().spawn(from,ItemDisplay.class,d->{ItemStack look=new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS);look.editMeta(m->m.setItemModel(new NamespacedKey("blastforge","water_orb")));
+        ItemDisplay orb=from.getWorld().spawn(from,ItemDisplay.class,d->{ItemStack look=new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS);look.editMeta(m->dev.duckmc.blastforge.Compat.itemModel(m,new NamespacedKey("blastforge","water_orb")));
             d.setItemStack(look);d.setPersistent(false);d.setTeleportDuration(2);d.setInterpolationDuration(2);
             d.setTransformationMatrix(new org.joml.Matrix4f().scale(.8f));d.getPersistentDataContainer().set(ExpansionItems.key("magic_visual"),PersistentDataType.STRING,p.getUniqueId().toString());});
         particles(from,Particle.SPLASH,20,.4);sound(from,Sound.ITEM_BUCKET_FILL,1f,1f);

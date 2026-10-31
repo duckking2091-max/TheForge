@@ -1,9 +1,9 @@
 name: TheForge
-version: '1.0.1'
+version: '1.1.0'
 main: dev.duckmc.blastforge.BlastForge
 bootstrapper: dev.duckmc.blastforge.BlastBootstrap
-api-version: '1.21.11'
-description: The Forge - blast mining, Forging Anvil, equipment progression, magic and custom merchants for Paper 1.21.11.
+api-version: '1.21'
+description: The Forge - blast mining, Forging Anvil, equipment progression, magic and custom merchants for Paper 1.21.x.
 author: DuckMC
 dependencies:
   server:

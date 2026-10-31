@@ -83,9 +83,10 @@ public final class PackVisuals implements Listener,AutoCloseable {
         var equipment=entity.getEquipment();if(equipment==null)return;var map=new EnumMap<EquipmentSlot,ItemStack>(EquipmentSlot.class);boolean custom=false;
         for(EquipmentSlot slot:List.of(EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET)){
             ItemStack actual=equipment.getItem(slot);ItemStack displayed=actual.clone();String id=items.id(actual),tier=ExpansionItems.tier(id);
-            if(ExpansionItems.isArmor(ExpansionItems.piece(id))&&!tier.isEmpty()){custom=true;if(loaded(viewer)){var meta=displayed.getItemMeta();var component=meta.getEquippable();component.setSlot(slot);
+            if(ExpansionItems.isArmor(ExpansionItems.piece(id))&&!tier.isEmpty()){custom=true;if(loaded(viewer)){var meta=displayed.getItemMeta();
                     // The Wardenite helmet has a real 3D model: with no armor model set, Minecraft draws the item itself on the head.
-                    component.setModel(tier.equals("wardenite")&&slot==EquipmentSlot.HEAD&&configs.apply("config").getBoolean("visuals.wardenite-3d-helmet",true)?null:new NamespacedKey("blastforge",tier));meta.setEquippable(component);displayed.setItemMeta(meta);}}
+                    // Custom armor models need 1.21.2+; older servers show the netherite look.
+                    if(dev.duckmc.blastforge.Compat.equipmentModel(meta,slot,tier.equals("wardenite")&&slot==EquipmentSlot.HEAD&&configs.apply("config").getBoolean("visuals.wardenite-3d-helmet",true)&&dev.duckmc.blastforge.Compat.atLeast(4)?null:new NamespacedKey("blastforge",tier)))displayed.setItemMeta(meta);}}
             map.put(slot,displayed);
         }
         if(custom||reset)viewer.sendEquipmentChange(entity,map);

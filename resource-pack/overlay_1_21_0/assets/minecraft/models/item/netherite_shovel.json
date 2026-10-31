@@ -1,0 +1,44 @@
+{
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "minecraft:item/netherite_shovel"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9026
+   },
+   "model": "blastforge:item/siftie_shovel"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9027
+   },
+   "model": "minecraft:item/netherite_shovel"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9035
+   },
+   "model": "blastforge:item/enderite_shovel"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9036
+   },
+   "model": "minecraft:item/netherite_shovel"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9044
+   },
+   "model": "blastforge:item/wardenite_shovel"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9045
+   },
+   "model": "minecraft:item/netherite_shovel"
+  }
+ ]
+}

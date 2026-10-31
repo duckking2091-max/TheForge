@@ -39,7 +39,7 @@ public final class ExpansionItems {
         map.put("dragon_heart",Material.DRAGON_BREATH); map.put("warden_heart",Material.HEART_OF_THE_SEA); map.put("bat_wing",Material.PHANTOM_MEMBRANE);
         for(String book:List.of("fire","water","earth","wind","darkness"))map.put(book+"_book",Material.ENCHANTED_BOOK);
         map.put("legendary_scythe",Material.NETHERITE_SWORD);
-        for(String tier:TIERS)for(String piece:PIECES)map.put(tier+"_"+piece,Material.valueOf("NETHERITE_"+piece.toUpperCase(Locale.ROOT)));
+        for(String tier:TIERS)for(String piece:PIECES){Material carrier=Material.matchMaterial("NETHERITE_"+piece.toUpperCase(Locale.ROOT));if(carrier!=null)map.put(tier+"_"+piece,carrier);}   /* spears exist from 1.21.11 */
         for(String model:List.of("anvil_hammer","anvil_tools","magician_robes","miner_helmet","miner_backpack"))map.put(model,Material.PAPER);map.put("magician_hat",Material.PAPER);for(String t:List.of("tab_forging","tab_upgrading","tab_ritual","tab_rename","tab_close","guide_button"))map.put(t,Material.PAPER);
         BASES=Collections.unmodifiableMap(map);
     }
@@ -132,7 +132,7 @@ public final class ExpansionItems {
             armor?1:perPiece(cfg,path+"mining-speed",piece,tier.equals("siftie")?1.15:1));
         if(armor) {
             // The netherite carrier already equips into the right slot. A custom override here made every piece go on the head.
-            meta.setEquippable(null);
+            dev.duckmc.blastforge.Compat.clearEquippable(meta);
         }
     }
     private double knockback=.15;
@@ -152,16 +152,17 @@ public final class ExpansionItems {
         });
         meta.setAttributeModifiers(modifiers);
         if(isArmor(piece)) {
-            add(meta,Attribute.ARMOR,piece+"_armor",Math.max(0,armor),group,AttributeModifier.Operation.ADD_NUMBER);
-            add(meta,Attribute.ARMOR_TOUGHNESS,piece+"_toughness",Math.max(0,toughness),group,AttributeModifier.Operation.ADD_NUMBER);
-            add(meta,Attribute.KNOCKBACK_RESISTANCE,piece+"_knockback",Math.clamp(knockback,0,1),group,AttributeModifier.Operation.ADD_NUMBER);
+            add(meta,dev.duckmc.blastforge.Compat.attribute("armor"),piece+"_armor",Math.max(0,armor),group,AttributeModifier.Operation.ADD_NUMBER);
+            add(meta,dev.duckmc.blastforge.Compat.attribute("armor_toughness"),piece+"_toughness",Math.max(0,toughness),group,AttributeModifier.Operation.ADD_NUMBER);
+            add(meta,dev.duckmc.blastforge.Compat.attribute("knockback_resistance"),piece+"_knockback",Math.clamp(knockback,0,1),group,AttributeModifier.Operation.ADD_NUMBER);
         } else {
-            add(meta,Attribute.ATTACK_DAMAGE,"equipment_damage",Math.max(0,damage-1),group,AttributeModifier.Operation.ADD_NUMBER);
-            add(meta,Attribute.ATTACK_SPEED,"equipment_speed",Math.max(-4,speed-4),group,AttributeModifier.Operation.ADD_NUMBER);
-            if(mining!=1)add(meta,Attribute.BLOCK_BREAK_SPEED,"equipment_mining",Math.max(-.99,mining-1),group,AttributeModifier.Operation.ADD_SCALAR);
+            add(meta,dev.duckmc.blastforge.Compat.attribute("attack_damage"),"equipment_damage",Math.max(0,damage-1),group,AttributeModifier.Operation.ADD_NUMBER);
+            add(meta,dev.duckmc.blastforge.Compat.attribute("attack_speed"),"equipment_speed",Math.max(-4,speed-4),group,AttributeModifier.Operation.ADD_NUMBER);
+            if(mining!=1)add(meta,dev.duckmc.blastforge.Compat.attribute("block_break_speed"),"equipment_mining",Math.max(-.99,mining-1),group,AttributeModifier.Operation.ADD_SCALAR);
         }
     }
     private static void add(ItemMeta meta,Attribute attribute,String id,double value,EquipmentSlotGroup slot,AttributeModifier.Operation operation) {
+        if(attribute==null)return;   // e.g. block break speed on a server without it
         meta.addAttributeModifier(attribute,new AttributeModifier(key(id),value,operation,slot));
     }
     static int maxDamage(ItemStack stack) {return stack.getItemMeta() instanceof Damageable d && d.hasMaxDamage()?d.getMaxDamage():stack.getType().getMaxDurability();}
@@ -181,7 +182,7 @@ public final class ExpansionItems {
         if(id.equals("enchanting_anvil")&&stack.hasItemMeta()&&stack.getItemMeta().hasDisplayName()&&net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(stack.getItemMeta().displayName()).equals("Enchanting Anvil")){
             stack.editMeta(m->m.displayName(create("enchanting_anvil").getItemMeta().displayName()));return true;}   /* renamed to The Forging Anvil */
         if(piece.isEmpty()||tier(id).isEmpty())return false;boolean changed=false;
-        if(isArmor(piece)&&stack.getItemMeta().hasEquippable()){stack.editMeta(m->m.setEquippable(null));changed=true;}
+        if(isArmor(piece)){var m=stack.getItemMeta();if(dev.duckmc.blastforge.Compat.clearEquippable(m)){stack.setItemMeta(m);changed=true;}}
         /* Bring the glint of existing items in line with the current setting (the helmet has none by default). */
         String tier=tier(id);Boolean want=glint(tier,piece)?Boolean.TRUE:null;var meta=stack.getItemMeta();
         Boolean have=meta.hasEnchantmentGlintOverride()?meta.getEnchantmentGlintOverride():null;

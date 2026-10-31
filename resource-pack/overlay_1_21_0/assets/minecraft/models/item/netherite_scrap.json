@@ -1,0 +1,32 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "minecraft:item/netherite_scrap"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9006
+   },
+   "model": "blastforge:item/enderite_scrap"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9007
+   },
+   "model": "minecraft:item/netherite_scrap"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9011
+   },
+   "model": "blastforge:item/wardenite_scrap"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9012
+   },
+   "model": "minecraft:item/netherite_scrap"
+  }
+ ]
+}

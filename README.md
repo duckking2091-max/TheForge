@@ -1,6 +1,6 @@
 # The Forge
 
-**Rare ores, a magical forge, elemental spell books and one legendary weapon — for Paper 1.21.11.**
+**Rare ores, a magical forge, elemental spell books and one legendary weapon — for Paper 1.21.x.**
 
 The Forge adds a full progression on top of vanilla survival: dig deeper with Blast mining, find three new ores,
 forge and upgrade your gear at a custom anvil, learn elemental magic from a wandering Magician, and — if you are
@@ -66,14 +66,25 @@ spell explained — using the server's real settings.
 
 ---
 
+### Supported versions
+The Forge runs on **every Paper 1.21.x server, from 1.21.0 to 1.21.11**, and its single resource pack works on every
+1.21.x client. A few features need a newer Minecraft and are simply skipped on older ones:
+
+| Feature | Needs |
+|---|---|
+| Spears (Siftie / Enderite / Wardenite) | 1.21.11 |
+| Wardenite helmet 3D model, the flying water block in Water Strike | 1.21.4+ (older: normal Wardenite armour / a glass block) |
+| Custom armour looks for Siftie, Enderite and Wardenite | 1.21.2+ (older: netherite look; stats are the same) |
+| Blast offered by enchanting tables | most 1.21 builds (the very first ones: librarian books only) |
+
 ## 📦 Installation
-1. Requires **Paper 1.21.11** and **Java 21**.
-2. Put `TheForge-1.0.1.jar` in `plugins` and restart the server.
-3. Resource pack (strongly recommended): download `TheForge-1.21.11-pack.zip`, host it at a direct link, and set
+1. Requires **Paper 1.21.x** (1.21.0 – 1.21.11) and **Java 21**.
+2. Put `TheForge-1.1.0.jar` in `plugins` and restart the server.
+3. Resource pack (strongly recommended): download `TheForge-pack.zip`, host it at a direct link, and set
    in `server.properties`:
    ```
    resource-pack=<direct link to the zip>
-   resource-pack-sha1=<sha-1 from TheForge-1.21.11-pack.sha1>
+   resource-pack-sha1=<sha-1 from TheForge-pack.sha1>
    require-resource-pack=true
    ```
 4. Adjust everything you like in `plugins/TheForge/` (`magic.yml`, `materials.yml`, `villagers.yml`, `scythe.yml`, …)
@@ -104,8 +115,9 @@ Requires Java 21 and Maven.
 mvn clean package
 python .tools/generate_expansion_pack.py --repack
 ```
-The first command runs the tests and writes `target/TheForge-1.0.1.jar`; the second validates the `resource-pack/`
-folder and builds `release/expansion/TheForge-1.21.11-pack.zip` with its SHA-1.
+The first command runs the tests and writes `target/TheForge-1.1.0.jar`; the second validates the `resource-pack/`
+folder, adds the overlays for older 1.21 clients (`.tools/legacy_pack.py`) and builds `release/expansion/TheForge-pack.zip`
+with its SHA-1. `.tools/check-versions.sh` compiles the plugin against every Paper 1.21.x API.
 Hand-made art lives in `.tools/art/`; the guide book's pictures are rebuilt with `.tools/art/guide/fig/figures.py`.
 
 Full player and server guide: [docs/expansion/USER_GUIDE.md](docs/expansion/USER_GUIDE.md).

@@ -1,0 +1,17 @@
+{
+ "parent": "minecraft:block/ancient_debris",
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9008
+   },
+   "model": "blastforge:item/enderite_ore"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9009
+   },
+   "model": "minecraft:block/ancient_debris"
+  }
+ ]
+}

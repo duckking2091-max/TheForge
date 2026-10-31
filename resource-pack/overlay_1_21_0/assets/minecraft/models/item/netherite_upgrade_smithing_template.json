@@ -1,0 +1,44 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "minecraft:item/netherite_upgrade_smithing_template"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9005
+   },
+   "model": "blastforge:item/siftie_template"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9006
+   },
+   "model": "minecraft:item/netherite_upgrade_smithing_template"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9009
+   },
+   "model": "blastforge:item/enderite_template"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9010
+   },
+   "model": "minecraft:item/netherite_upgrade_smithing_template"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9013
+   },
+   "model": "blastforge:item/wardenite_template"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9014
+   },
+   "model": "minecraft:item/netherite_upgrade_smithing_template"
+  }
+ ]
+}

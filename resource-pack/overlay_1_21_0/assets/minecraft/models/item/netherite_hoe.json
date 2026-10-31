@@ -1,0 +1,44 @@
+{
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "minecraft:item/netherite_hoe"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9027
+   },
+   "model": "blastforge:item/siftie_hoe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9028
+   },
+   "model": "minecraft:item/netherite_hoe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9036
+   },
+   "model": "blastforge:item/enderite_hoe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9037
+   },
+   "model": "minecraft:item/netherite_hoe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9045
+   },
+   "model": "blastforge:item/wardenite_hoe"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9046
+   },
+   "model": "minecraft:item/netherite_hoe"
+  }
+ ]
+}

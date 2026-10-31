@@ -1,0 +1,56 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "minecraft:item/enchanted_book"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9001
+   },
+   "model": "blastforge:item/forging_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9002
+   },
+   "model": "minecraft:item/enchanted_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9017
+   },
+   "model": "blastforge:item/fire_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9018
+   },
+   "model": "blastforge:item/water_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9019
+   },
+   "model": "blastforge:item/earth_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9020
+   },
+   "model": "blastforge:item/wind_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9021
+   },
+   "model": "blastforge:item/darkness_book"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9022
+   },
+   "model": "minecraft:item/enchanted_book"
+  }
+ ]
+}

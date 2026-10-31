@@ -1,0 +1,17 @@
+{
+ "parent": "minecraft:block/anvil",
+ "overrides": [
+  {
+   "predicate": {
+    "custom_model_data": 9000
+   },
+   "model": "blastforge:item/enchanting_anvil"
+  },
+  {
+   "predicate": {
+    "custom_model_data": 9001
+   },
+   "model": "minecraft:block/anvil"
+  }
+ ]
+}

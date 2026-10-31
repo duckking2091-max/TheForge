@@ -22,6 +22,8 @@ import java.util.function.Function;
 
 /** New-chunk generation and persistent coordinate ownership, independent of carrier block textures. */
 public final class MaterialSystem implements Listener,AutoCloseable {
+    /** The player's block break speed attribute (renamed in 1.21.2); null when the server lacks it. */
+    private static org.bukkit.attribute.AttributeInstance attr(Player player){var type=dev.duckmc.blastforge.Compat.attribute("block_break_speed");return type==null?null:player.getAttribute(type);}
     private static final NamespacedKey OVERLAY=ExpansionItems.key("ore_overlay");
     private static final int CACHE_LIMIT=512,QUEUE_LIMIT=2048;
     private final JavaPlugin plugin;private final ExpansionItems items;private final Function<String,FileConfiguration> configs;private final PersistentStore store;
@@ -222,7 +224,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     @EventHandler(priority=EventPriority.HIGH,ignoreCancelled=true)
     public void armorPerks(EntityDamageEvent event) {
         if(!(event.getEntity() instanceof Player player))return;
-        if(event.getDamageSource().getDamageType().equals(DamageType.ENDER_PEARL) && perk(player,"enderite"))
+        if(event.getDamageSource().getDamageType().getKey().getKey().equals("ender_pearl") && perk(player,"enderite"))
             event.setDamage(event.getDamage()*(1-Math.clamp(cfg().getDouble("armor-perks.ender-pearl-reduction",.5),0,1)));
         else if(event.getDamageSource().getDamageType().equals(DamageType.SONIC_BOOM) && perk(player,"wardenite"))
             event.setDamage(event.getDamage()*(1-Math.clamp(cfg().getDouble("armor-perks.sonic-boom-reduction",.2),0,1)));
@@ -275,15 +277,15 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         String toolTier=items.equipmentTier(tool);boolean custom=List.of("siftie","enderite","wardenite").contains(toolTier)&&items.equipmentPiece(tool).equals("pickaxe");
         double seconds=custom?cfg().getDouble("mining-seconds.enderite-with-siftie",15):cfg().getDouble("mining-seconds.enderite",20);
         double m=hardness*30/(20.0*seconds*35);
-        if(custom){var attribute=player.getAttribute(org.bukkit.attribute.Attribute.BLOCK_BREAK_SPEED);double current=attribute==null?1:attribute.getValue();m/=Math.max(.01,current);} // cancel the tool's own speed bonus so every custom pickaxe takes the same time
+        if(custom){var attribute=attr(player);double current=attribute==null?1:attribute.getValue();m/=Math.max(.01,current);} // cancel the tool's own speed bonus so every custom pickaxe takes the same time
         return m;
     }
     private void slow(Player player,double multiplier){
-        var attribute=player.getAttribute(org.bukkit.attribute.Attribute.BLOCK_BREAK_SPEED);if(attribute==null)return;
+        var attribute=attr(player);if(attribute==null)return;
         clearSlow(player);attribute.addTransientModifier(new org.bukkit.attribute.AttributeModifier(SLOW,multiplier-1,org.bukkit.attribute.AttributeModifier.Operation.MULTIPLY_SCALAR_1));slowed.add(player.getUniqueId());
     }
     private void clearSlow(Player player){
-        if(!slowed.remove(player.getUniqueId()))return;var attribute=player.getAttribute(org.bukkit.attribute.Attribute.BLOCK_BREAK_SPEED);if(attribute!=null)attribute.removeModifier(SLOW);
+        if(!slowed.remove(player.getUniqueId()))return;var attribute=attr(player);if(attribute!=null)attribute.removeModifier(SLOW);
     }
     @EventHandler(priority=EventPriority.HIGH,ignoreCancelled=true) public void digStart(BlockDamageEvent e){
         String tier=tier(e.getBlock());if(tier.isEmpty()||e.getPlayer().getGameMode()==GameMode.CREATIVE){clearSlow(e.getPlayer());return;}

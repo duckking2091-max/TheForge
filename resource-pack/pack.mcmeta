@@ -1,13 +1,43 @@
 {
-  "pack": {
-    "description": "The Forge \u2022 Java 1.21.11",
-    "min_format": [
-      75,
-      0
+ "pack": {
+  "description": "The Forge \u2022 Java 1.21.x",
+  "pack_format": 34,
+  "supported_formats": [
+   34,
+   75
+  ],
+  "min_format": 34,
+  "max_format": 75
+ },
+ "overlays": {
+  "entries": [
+   {
+    "formats": [
+     34,
+     45
     ],
-    "max_format": [
-      75,
-      0
-    ]
-  }
+    "min_format": 34,
+    "max_format": 45,
+    "directory": "overlay_1_21_0"
+   },
+   {
+    "formats": [
+     42,
+     45
+    ],
+    "min_format": 42,
+    "max_format": 45,
+    "directory": "overlay_1_21_2"
+   },
+   {
+    "formats": [
+     34,
+     74
+    ],
+    "min_format": 34,
+    "max_format": 74,
+    "directory": "overlay_pre_arb"
+   }
+  ]
+ }
 }

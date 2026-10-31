@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "blastforge:enderite"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "blastforge:enderite"
+      }
+    ]
+  }
+}
