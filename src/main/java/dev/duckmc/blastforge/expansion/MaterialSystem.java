@@ -109,16 +109,22 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         int min=Math.max(world.getMinHeight(),cfg().getInt(path+"min-y",tier.equals("siftie")?-60:20));
         int max=Math.min(world.getMaxHeight()-1,cfg().getInt(path+"max-y",tier.equals("siftie")?-30:70));
         if(max<min)return;
-        int attempts=Math.clamp(cfg().getInt(path+"attempts",tier.equals("siftie")?2:1),0,16);
-        int maxVein=Math.clamp(cfg().getInt(path+"vein-size",tier.equals("siftie")?4:5),1,16);
+        int attempts=Math.clamp(cfg().getInt(path+"attempts",1),0,16);
+        int maxVein=Math.clamp(cfg().getInt(path+"vein-size",tier.equals("siftie")?3:5),1,16);
         Random random=new Random(world.getSeed()^((long)chunk.getX()*341873128712L)^((long)chunk.getZ()*132897987541L));
         /* Like ancient debris, underground Enderite only replaces end stone that is fully buried (hide-from-air). */
         boolean hidden=tier.equals("enderite")&&cfg().getBoolean(path+"hide-from-air",true);
         java.util.function.Predicate<Block> host=b->tier.equals("siftie")?Set.of(Material.STONE,Material.DEEPSLATE,Material.TUFF).contains(b.getType()):b.getType()==Material.END_STONE&&!(hidden&&exposed(b));
+        // chance: how often each attempt really makes a vein (Siftie is rarer than diamonds: by default 1 vein in ~4 chunks)
+        double chance=Math.clamp(cfg().getDouble(path+"chance",tier.equals("siftie")?.25:1),0,1);
+        // exposed-chance: how often a vein is placed on a cave wall (visible) instead of buried in stone
+        double exposedChance=Math.clamp(cfg().getDouble(path+"exposed-chance",tier.equals("siftie")?.3:1),0,1);
         for(int n=0;n<attempts;n++) {
             int x=random.nextInt(16),z=random.nextInt(16),y=min+random.nextInt(max-min+1);
-            // Like diamonds, veins prefer to start on a cave wall or open surface so players can spot them.
-            int tries=Math.clamp(cfg().getInt(path+"visible-search",tier.equals("siftie")?48:0),0,256);
+            boolean make=random.nextDouble()<chance,visible=random.nextDouble()<exposedChance;
+            if(!make)continue;
+            // Some veins start on a cave wall or open surface so players can spot them; the rest stay buried.
+            int tries=visible?Math.clamp(cfg().getInt(path+"visible-search",tier.equals("siftie")?48:0),0,256):0;
             for(int t=0;t<tries;t++){int tx=random.nextInt(16),tz=random.nextInt(16),ty=min+random.nextInt(max-min+1);Block c=chunk.getBlock(tx,ty,tz);if(host.test(c)&&exposed(c)){x=tx;y=ty;z=tz;break;}}
             vein(chunk,key,tier,host,random,x,y,z,min,max,1+random.nextInt(maxVein));
         }

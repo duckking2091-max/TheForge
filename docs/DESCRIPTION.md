@@ -5,10 +5,10 @@
 ## 📥 Download & quick setup
 | What | Where |
 |---|---|
-| **Plugin** — `TheForge-1.1.0.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
+| **Plugin** — `TheForge-1.1.1.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
 | **Resource pack** — `TheForge-pack.zip` | [The Forge Resource Pack on Modrinth](https://modrinth.com/resourcepack/the-forge-resource-pack) (the same file works for every 1.21.x version) |
 
-1. Put `TheForge-1.1.0.jar` in your server's `plugins` folder (Paper **1.21.0 – 1.21.11**, Java 21).
+1. Put `TheForge-1.1.1.jar` in your server's `plugins` folder (Paper **1.21.0 – 1.21.11**, Java 21).
 2. Open [The Forge Resource Pack](https://modrinth.com/resourcepack/the-forge-resource-pack), go to its **Versions** tab, right-click the download button of the newest version and **Copy link**.
    Then add to `server.properties`. The SHA-1 of the current pack (1.1.0) is `815cb4e106c7bb7d6ae4116dc10ccf36f09862ef`:
    ```

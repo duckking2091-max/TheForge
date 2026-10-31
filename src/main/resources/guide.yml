@@ -38,7 +38,7 @@ chapters:
     short: "Ores & Materials"   # name on the contents page
     color: green
     text:
-      - "<aqua><b>SIFTIE • LOCATION</b></aqua><newline>Find Siftie in the Overworld between Y {materials:generation.siftie.min-y} and {materials:generation.siftie.max-y}. It is about as common as diamond ore and often appears on cave walls."
+      - "<aqua><b>SIFTIE • LOCATION</b></aqua><newline>Find Siftie in the Overworld between Y {materials:generation.siftie.min-y} and {materials:generation.siftie.max-y}. It is rarer than diamond ore and is usually buried inside stone, only sometimes showing on cave walls."
       - "<aqua><b>SIFTIE • MINING</b></aqua><newline>Only new chunks contain it. Use a diamond pickaxe or better; weaker tools give no drop."
       - "<aqua><b>SIFTIE • PROCESSING</b></aqua><newline>Siftie drops Raw Siftie. Fortune increases drops; Silk Touch preserves the ore. Smelt Raw Siftie in a furnace or blast furnace for an ingot. [figure:ore_siftie]"
       - "<aqua><b>SIFTIE • HARDNESS</b></aqua><newline>An Efficiency V netherite pickaxe takes about {materials:mining-seconds.siftie} seconds to break Siftie ore."

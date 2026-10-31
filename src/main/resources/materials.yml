@@ -44,12 +44,15 @@ tiers:
     helmet-glint: false   # the 3D horned helmet looks better without it
     tool-glint: false     # tools and weapons (sword, pickaxe, axe, shovel, hoe, spear)
 generation:
-  # Siftie: about as common as diamonds. Each vein has 1 to vein-size blocks.
+  # Siftie: rarer than diamonds (it is better than netherite). Each vein has 1 to vein-size blocks.
   siftie:
     enabled: true
-    attempts: 2
-    vein-size: 4
-    # Veins look for a spot on a cave wall first (like diamonds) so players can see them.
+    attempts: 1
+    # Chance that an attempt makes a vein: 0.25 = about 1 vein every 4 chunks.
+    chance: 0.25
+    vein-size: 3
+    # Chance that a vein sits on a cave wall where players can see it; the rest are buried in stone.
+    exposed-chance: 0.3
     visible-search: 48
     min-y: -60
     max-y: -30

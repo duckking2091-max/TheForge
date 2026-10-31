@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MaterialSystemTest {
     @TempDir Path directory;
     ServerMock server; ExpansionItems items; MaterialSystem system; PersistentStore state; YamlConfiguration settings;
-    @BeforeEach void setup(){server=MockBukkit.mock();var plugin=MockBukkit.createMockPlugin();settings=new YamlConfiguration();settings.set("generation.siftie.min-y",0);settings.set("generation.siftie.max-y",0);settings.set("generation.siftie.attempts",1);settings.set("generation.siftie.vein-size",1);settings.set("ore-visuals.enabled",false);items=new ExpansionItems(plugin,n->settings);state=new PersistentStore(directory.resolve("materials.sqlite"));system=new MaterialSystem(plugin,items,n->settings,state);system.start();}
+    @BeforeEach void setup(){server=MockBukkit.mock();var plugin=MockBukkit.createMockPlugin();settings=new YamlConfiguration();settings.set("generation.siftie.min-y",0);settings.set("generation.siftie.max-y",0);settings.set("generation.siftie.attempts",1);settings.set("generation.siftie.chance",1);settings.set("generation.siftie.vein-size",1);settings.set("ore-visuals.enabled",false);items=new ExpansionItems(plugin,n->settings);state=new PersistentStore(directory.resolve("materials.sqlite"));system=new MaterialSystem(plugin,items,n->settings,state);system.start();}
     @AfterEach void teardown(){system.close();state.close();MockBukkit.unmock();}
     @Test void oldChunksNeverGenerateAndNewGenerationPersistsWithoutRepeating(){
         var world=server.addSimpleWorld("overworld");var chunk=world.getChunkAt(0,0);for(int x=0;x<16;x++)for(int z=0;z<16;z++)world.getBlockAt(x,0,z).setType(Material.DEEPSLATE);

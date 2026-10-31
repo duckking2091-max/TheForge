@@ -1,4 +1,4 @@
-# The Forge 1.1.0 — player and server guide
+# The Forge 1.1.1 — player and server guide
 
 Target: Paper 1.21.0 – 1.21.11 (Java 21+). Spigot and Folia are not supported.
 Players also get this information in-game: new players receive **The Forging Starter**, an illustrated two-page
@@ -18,7 +18,7 @@ The Forge runs on **every Paper 1.21.x server, from 1.21.0 to 1.21.11**, and its
 ## Install or update
 
 1. Stop the server and back up the worlds and `plugins/TheForge` together.
-2. Keep one The Forge JAR in `plugins` (`TheForge-1.1.0.jar`).
+2. Keep one The Forge JAR in `plugins` (`TheForge-1.1.1.jar`).
 3. Start Paper 1.21.x. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
    Never delete the database when editing settings.
 4. Resource pack: host `TheForge-pack.zip` at a direct link and set `resource-pack` and
@@ -55,7 +55,7 @@ Sneak to mine a single block.
 
 ## Materials
 
-- **Siftie** — new Overworld chunks, Y −60 to −30, diamond pickaxe or better. Raw Siftie smelts into ingots.
+- **Siftie** — new Overworld chunks, Y −60 to −30, rarer than diamonds and mostly buried in stone (about 1 small vein every 4 chunks), diamond pickaxe or better. Raw Siftie smelts into ingots.
 - **Enderite** — buried inside outer End islands (at least 1024 blocks from the centre), rare on the surface,
   netherite pickaxe or better; Wardenite pickaxes cannot insta-mine it. Raw Enderite smelts into ingots;
   two ingots stacked make an Enderite Stick.
