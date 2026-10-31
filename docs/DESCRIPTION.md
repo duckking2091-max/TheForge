@@ -68,7 +68,7 @@ spell explained — using the server's real settings.
 
 ## 📦 Installation
 1. Requires **Paper 1.21.11** and **Java 21**.
-2. Put `TheForge-1.0.0.jar` in `plugins` and restart the server.
+2. Put `TheForge-1.0.1.jar` in `plugins` and restart the server.
 3. Resource pack (strongly recommended): download `TheForge-1.21.11-pack.zip`, host it at a direct link, and set
    in `server.properties`:
    ```

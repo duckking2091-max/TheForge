@@ -17,7 +17,7 @@ public final class Mailbox implements Listener {
     private final NamespacedKey stamp;
     private final java.util.function.Consumer<Player> save;
     public Mailbox(JavaPlugin plugin,PersistentStore store){this(plugin,store,PlayerSaveCheckpoint::save);}
-    public Mailbox(JavaPlugin plugin,PersistentStore store,java.util.function.Consumer<Player> save){this.plugin=plugin;this.store=store;this.save=save;stamp=new NamespacedKey(plugin,"delivery_batch");}
+    public Mailbox(JavaPlugin plugin,PersistentStore store,java.util.function.Consumer<Player> save){this.plugin=plugin;this.store=store;this.save=save;stamp=new NamespacedKey("blastforge","delivery_batch");}
     public void savePlayer(Player player){save.accept(player);}
     public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);plugin.getServer().getScheduler().runTaskTimer(plugin,()->plugin.getServer().getOnlinePlayers().forEach(this::deliver),100,100);}
     public void queue(UUID player,UUID transaction,List<ItemStack> items,int levels){
@@ -33,7 +33,7 @@ public final class Mailbox implements Listener {
             if(store.get("mailbox_done",entry.getKey())!=null||store.get("quarantine",entry.getKey())!=null){store.remove("mailbox",entry.getKey());continue;}
             String[] parts=entry.getValue().split("\n",3);if(parts.length!=3){quarantine(entry.getKey(),entry.getValue());continue;}
             String tx=entry.getKey().substring(entry.getKey().indexOf(':')+1);
-            NamespacedKey receipt=new NamespacedKey(plugin,"receipt_"+tx);
+            NamespacedKey receipt=new NamespacedKey("blastforge","receipt_"+tx);
             if(player.getPersistentDataContainer().has(receipt,PersistentDataType.BYTE)){
                 try{savePlayer(player);finish(player,entry.getKey(),receipt,tx);}catch(RuntimeException error){plugin.getLogger().severe("Delivery acknowledgement retained: "+entry.getKey()+": "+error);return;}continue;
             }

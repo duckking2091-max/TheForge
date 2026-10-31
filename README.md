@@ -68,7 +68,7 @@ spell explained — using the server's real settings.
 
 ## 📦 Installation
 1. Requires **Paper 1.21.11** and **Java 21**.
-2. Put `TheForge-1.0.0.jar` in `plugins` and restart the server.
+2. Put `TheForge-1.0.1.jar` in `plugins` and restart the server.
 3. Resource pack (strongly recommended): download `TheForge-1.21.11-pack.zip`, host it at a direct link, and set
    in `server.properties`:
    ```
@@ -104,7 +104,7 @@ Requires Java 21 and Maven.
 mvn clean package
 python .tools/generate_expansion_pack.py --repack
 ```
-The first command runs the tests and writes `target/TheForge-1.0.0.jar`; the second validates the `resource-pack/`
+The first command runs the tests and writes `target/TheForge-1.0.1.jar`; the second validates the `resource-pack/`
 folder and builds `release/expansion/TheForge-1.21.11-pack.zip` with its SHA-1.
 Hand-made art lives in `.tools/art/`; the guide book's pictures are rebuilt with `.tools/art/guide/fig/figures.py`.
 

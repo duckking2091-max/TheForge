@@ -21,7 +21,7 @@ final class ForgeItems implements Listener {
     private final JavaPlugin plugin;
     private final NamespacedKey kind;
     private final Enchantment blast;
-    ForgeItems(JavaPlugin plugin,Enchantment blast) { this.plugin=plugin; this.blast=blast; kind=new NamespacedKey(plugin,"item_kind"); }
+    ForgeItems(JavaPlugin plugin,Enchantment blast) { this.plugin=plugin; this.blast=blast; kind=new NamespacedKey("blastforge","item_kind"); }
     ItemStack book() { return marked(Material.ENCHANTED_BOOK,"forging_book","Book of Forging","Used to craft The Forging Anvil."); }
     ItemStack anvil() { return marked(Material.ANVIL,"enchanting_anvil","The Forging Anvil","Merge enchantments across tool materials."); }
     private ItemStack marked(Material type,String value,String name,String lore) {
@@ -44,7 +44,7 @@ final class ForgeItems implements Listener {
         return stack;
     }
     void registerRecipe() {
-        ShapedRecipe recipe=new ShapedRecipe(new NamespacedKey(plugin,"enchanting_anvil"),anvil());
+        ShapedRecipe recipe=new ShapedRecipe(new NamespacedKey("blastforge","enchanting_anvil"),anvil());
         recipe.shape("IBI"," A ","DDD");
         recipe.setIngredient('I',Material.IRON_BLOCK);
         recipe.setIngredient('B',new RecipeChoice.ExactChoice(book()));

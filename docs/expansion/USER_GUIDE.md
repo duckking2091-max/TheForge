@@ -1,4 +1,4 @@
-# The Forge 1.0.0 — player and server guide
+# The Forge 1.0.1 — player and server guide
 
 Target: Paper 1.21.11 (Java 21+). Other Minecraft versions, Spigot and Folia are not supported.
 Players also get this information in-game: new players receive **The Forging Starter**, an illustrated two-page
@@ -7,7 +7,7 @@ guide book (craft another with a book + an iron ingot, or use `/forge guide`).
 ## Install or update
 
 1. Stop the server and back up the worlds and `plugins/TheForge` together.
-2. Keep one The Forge JAR in `plugins` (`TheForge-1.0.0.jar`).
+2. Keep one The Forge JAR in `plugins` (`TheForge-1.0.1.jar`).
 3. Start Paper 1.21.11. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
    Never delete the database when editing settings.
 4. Resource pack: host `TheForge-1.21.11-pack.zip` at a direct link and set `resource-pack` and

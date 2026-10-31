@@ -35,6 +35,13 @@ class ForgeStationsTest {
         stations.place(event);
         return event;
     }
+    @Test void itemTagsDoNotDependOnThePluginName() {
+        // This test plugin is called "MockPlugin", not BlastForge or TheForge: renaming the plugin must never
+        // change the tags saved on items, or existing Forging Anvils turn into normal anvils.
+        var pdc=items.anvil().getItemMeta().getPersistentDataContainer();
+        assertTrue(pdc.has(new org.bukkit.NamespacedKey("blastforge","item_kind")),"anvil tag uses the fixed blastforge namespace");
+        assertTrue(items.isAnvil(items.anvil()));
+    }
     @Test void replacingBrokenStationWithOrdinaryAnvilNeverInheritsMarker() {
         place(items.anvil()); server.getScheduler().performOneTick();
         assertTrue(stations.isStation(block));

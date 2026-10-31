@@ -28,7 +28,7 @@ final class ForgeStations implements Listener {
     void opener(BiConsumer<Player,Location> opener){this.opener=opener;}
     void visuals(Consumer<Block> placed,Consumer<Block> removed){this.placed=placed;this.removed=removed;}
     private NamespacedKey key(Block block) {
-        return new NamespacedKey(plugin,"station_"+(block.getX()&15)+"_"+block.getY()+"_"+(block.getZ()&15));
+        return new NamespacedKey("blastforge","station_"+(block.getX()&15)+"_"+block.getY()+"_"+(block.getZ()&15));
     }
     boolean isStation(Block block) {
         return Tag.ANVIL.isTagged(block.getType()) && marked(block);
