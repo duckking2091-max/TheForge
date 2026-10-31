@@ -2,6 +2,26 @@
 
 **Rare ores, a magical forge, elemental spell books and one legendary weapon — for Paper 1.21.x.**
 
+## 📥 Download & quick setup
+| What | Where |
+|---|---|
+| **Plugin** — `TheForge-1.1.0.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
+| **Resource pack** — `TheForge-pack.zip` | [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) (the same file works for every 1.21.x version) |
+| **Pack checksum** — `TheForge-pack.sha1` | Next to the pack on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
+
+1. Put `TheForge-1.1.0.jar` in your server's `plugins` folder (Paper **1.21.0 – 1.21.11**, Java 21).
+2. Upload `TheForge-pack.zip` to any site that gives a **direct download link** (for example mc-packs.net), then add to `server.properties`:
+   ```
+   resource-pack=<direct link to TheForge-pack.zip>
+   resource-pack-sha1=<the text inside TheForge-pack.sha1>
+   require-resource-pack=true
+   ```
+3. Restart the server. New players get the guide book automatically, or use `/forge guide`.
+
+You only upload the pack once: it keeps working when you change your server's 1.21 version.
+
+---
+
 The Forge adds a full progression on top of vanilla survival: dig deeper with Blast mining, find three new ores,
 forge and upgrade your gear at a custom anvil, learn elemental magic from a wandering Magician, and — if you are
 brave enough — perform the Dark Ritual to create the only Legendary Scythe on the server.
@@ -77,18 +97,9 @@ The Forge runs on **every Paper 1.21.x server, from 1.21.0 to 1.21.11**, and its
 | Custom armour looks for Siftie, Enderite and Wardenite | 1.21.2+ (older: netherite look; stats are the same) |
 | Blast offered by enchanting tables | most 1.21 builds (the very first ones: librarian books only) |
 
-## 📦 Installation
-1. Requires **Paper 1.21.x** (1.21.0 – 1.21.11) and **Java 21**.
-2. Put `TheForge-1.1.0.jar` in `plugins` and restart the server.
-3. Resource pack (strongly recommended): download `TheForge-pack.zip`, host it at a direct link, and set
-   in `server.properties`:
-   ```
-   resource-pack=<direct link to the zip>
-   resource-pack-sha1=<sha-1 from TheForge-pack.sha1>
-   require-resource-pack=true
-   ```
-4. Adjust everything you like in `plugins/TheForge/` (`magic.yml`, `materials.yml`, `villagers.yml`, `scythe.yml`, …)
-   and run `/forge reload`.
+## ⚙️ Configuration
+Adjust everything you like in `plugins/TheForge/` (`magic.yml`, `materials.yml`, `villagers.yml`, `scythe.yml`, …)
+and run `/forge reload`.
 
 ## 🛠️ Commands
 | Command | What it does |
