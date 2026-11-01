@@ -1,11 +1,11 @@
 # The Forge 1.1.1 — player and server guide
 
-Target: Paper 1.21.0 – 1.21.11 (Java 21+). Spigot and Folia are not supported.
+Target: Paper, Purpur or Pufferfish 1.21.0 – 1.21.11 (Java 21+). Purpur and Pufferfish are built on Paper and run The Forge unchanged. Spigot and Folia are not supported.
 Players also get this information in-game: new players receive **The Forging Starter**, an illustrated two-page
 guide book (craft another with a book + an iron ingot, or use `/forge guide`).
 
 ### Supported versions
-The Forge runs on **every Paper 1.21.x server, from 1.21.0 to 1.21.11**, and its single resource pack works on every
+The Forge runs on **every Paper, Purpur and Pufferfish 1.21.x server, from 1.21.0 to 1.21.11** (Folia is not supported), and its single resource pack works on every
 1.21.x client. A few features need a newer Minecraft and are simply skipped on older ones:
 
 | Feature | Needs |
@@ -19,7 +19,7 @@ The Forge runs on **every Paper 1.21.x server, from 1.21.0 to 1.21.11**, and its
 
 1. Stop the server and back up the worlds and `plugins/TheForge` together.
 2. Keep one The Forge JAR in `plugins` (`TheForge-1.1.1.jar`).
-3. Start Paper 1.21.x. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
+3. Start Paper, Purpur or Pufferfish 1.21.x (not Folia). The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
    Never delete the database when editing settings.
 4. Resource pack: host `TheForge-pack.zip` at a direct link and set `resource-pack` and
    `resource-pack-sha1` in `server.properties` (see the README). With `resource-pack.url` empty in `config.yml`,
