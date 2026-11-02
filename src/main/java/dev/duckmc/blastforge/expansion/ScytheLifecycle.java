@@ -46,7 +46,7 @@ public final class ScytheLifecycle implements Listener {
     @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
     public void click(InventoryClickEvent event){
         if(identity(event.getCurrentItem())==null&&identity(event.getCursor())==null)return;
-        plugin.getServer().getScheduler().runTask(plugin,()->{
+        dev.duckmc.blastforge.Tasks.entity(plugin,event.getWhoClicked(),()->{
             for(ItemStack item:event.getWhoClicked().getInventory().getContents())observe(item,"player:"+event.getWhoClicked().getUniqueId());
             var top=event.getView().getTopInventory();Location location=top.getLocation();if(location!=null)for(ItemStack item:top.getContents())observe(item,"container:"+location.getWorld().getUID()+":"+location.getBlockX()+":"+location.getBlockY()+":"+location.getBlockZ());
         });
@@ -61,9 +61,9 @@ public final class ScytheLifecycle implements Listener {
         if(!configs.apply("scythe").getBoolean("enchanting-enabled",true)&&!base.getEnchantments().equals(result.getEnchantments()))event.setResult(null);
         if(!configs.apply("scythe").getBoolean("repair-enabled",true)&&base.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable before&&result.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable after&&after.getDamage()<before.getDamage())event.setResult(null);
     }
-    private void observe(ItemStack item,String where){UUID id=identity(item);if(id!=null){store.put("scythe_location",id.toString(),where);seen.put(id,Bukkit.getCurrentTick());}}
+    private void observe(ItemStack item,String where){UUID id=identity(item);if(id!=null){store.put("scythe_location",id.toString(),where);seen.put(id,dev.duckmc.blastforge.Tasks.tick());}}
     /** Last tick each scythe was seen somewhere (used to cancel a pending Creative deletion). */
-    private final Map<UUID,Integer> seen=new HashMap<>();
+    private final Map<UUID,Integer> seen=new java.util.concurrent.ConcurrentHashMap<>();
     /**
      * Marks a scythe permanently destroyed: its slot frees up, the Dark Ritual and the heart/wing drops resume.
      * Nobody receives a replacement. Returns false if it was not an active scythe.
@@ -108,7 +108,7 @@ public final class ScytheLifecycle implements Listener {
      * 2 seconds have passed, and it is in neither the player's inventory, the container they had open, nor dropped.
      * Creative copies of a scythe (middle-click / pick-block) are refused.
      */
-    private final Map<UUID,UUID> creativePending=new HashMap<>();   // scythe -> player
+    private final Map<UUID,UUID> creativePending=new java.util.concurrent.ConcurrentHashMap<>();   // scythe -> player
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void creative(InventoryCreativeEvent event){
         if(!(event.getWhoClicked() instanceof Player player))return;
@@ -117,28 +117,34 @@ public final class ScytheLifecycle implements Listener {
             int copies=0;for(ItemStack other:player.getInventory().getContents())if(placed.equals(identity(other)))copies++;
             ItemStack replaced=event.getCurrentItem();if(placed.equals(identity(replaced)))copies--;
             if(copies>0){event.setCancelled(true);player.sendMessage(net.kyori.adventure.text.Component.text("The Legendary Scythe cannot be copied.",net.kyori.adventure.text.format.NamedTextColor.RED));return;}
-            creativePending.remove(placed);seen.put(placed,Bukkit.getCurrentTick());
+            creativePending.remove(placed);seen.put(placed,dev.duckmc.blastforge.Tasks.tick());
         }
         UUID taken=identity(event.getCurrentItem());
         if(taken!=null && !taken.equals(placed))creativePending.put(taken,player.getUniqueId());
     }
     @EventHandler(priority=EventPriority.MONITOR)
-    public void creativeClose(InventoryCloseEvent event){checkCreative(event.getPlayer().getUniqueId(),event.getInventory());}
+    public void creativeClose(InventoryCloseEvent event){checkCreative(event.getPlayer().getUniqueId(),event.getInventory(),false);}
     @EventHandler(priority=EventPriority.MONITOR)
-    public void creativeQuit(PlayerQuitEvent event){checkCreative(event.getPlayer().getUniqueId(),null);}
-    private void checkCreative(UUID player,org.bukkit.inventory.Inventory container){
+    public void creativeQuit(PlayerQuitEvent event){checkCreative(event.getPlayer().getUniqueId(),null,true);}
+    private void checkCreative(UUID player,org.bukkit.inventory.Inventory container,boolean quitting){
         for(var pending:new ArrayList<>(creativePending.entrySet())){
-            if(!pending.getValue().equals(player))continue;UUID id=pending.getKey();int since=Bukkit.getCurrentTick();
-            plugin.getServer().getScheduler().runTaskLater(plugin,()->{
+            if(!pending.getValue().equals(player))continue;UUID id=pending.getKey();int since=dev.duckmc.blastforge.Tasks.tick();
+            Runnable check=()->{
                 if(!player.equals(creativePending.get(id)))return;
                 if(seen.getOrDefault(id,-1)>=since){creativePending.remove(id);return;}   // it was dropped or placed somewhere
                 Player p=Bukkit.getPlayer(player);
-                if(p!=null)for(ItemStack item:p.getInventory().getContents())if(id.equals(identity(item))){creativePending.remove(id);return;}
-                if(p!=null && id.equals(identity(p.getItemOnCursor()))){creativePending.remove(id);return;}
+                if(p!=null && dev.duckmc.blastforge.Tasks.owns(p)){
+                    for(ItemStack item:p.getInventory().getContents())if(id.equals(identity(item))){creativePending.remove(id);return;}
+                    if(id.equals(identity(p.getItemOnCursor()))){creativePending.remove(id);return;}
+                    // a scythe thrown out of a creative inventory lands next to the player (no whole-world search: not allowed on Folia)
+                    for(Item item:p.getWorld().getNearbyEntitiesByType(Item.class,p.getLocation(),32))if(id.equals(identity(item.getItemStack()))){creativePending.remove(id);return;}
+                }
                 if(container!=null)for(ItemStack item:container.getContents())if(id.equals(identity(item))){creativePending.remove(id);return;}
-                for(World w:Bukkit.getWorlds())for(Item item:w.getEntitiesByClass(Item.class))if(id.equals(identity(item.getItemStack()))){creativePending.remove(id);return;}
                 creativePending.remove(id);destroy(id,"deleted in Creative mode by "+(p!=null?p.getName():player));
-            },40);
+            };
+            Player online=Bukkit.getPlayer(player);
+            if(online!=null&&!quitting)dev.duckmc.blastforge.Tasks.entityLater(plugin,online,40,check);   // on the player's own thread
+            else dev.duckmc.blastforge.Tasks.globalLater(plugin,40,check);
         }
     }
     public void close(){HandlerList.unregisterAll(this);}

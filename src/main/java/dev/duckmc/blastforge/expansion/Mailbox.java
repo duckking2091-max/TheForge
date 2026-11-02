@@ -19,14 +19,14 @@ public final class Mailbox implements Listener {
     public Mailbox(JavaPlugin plugin,PersistentStore store){this(plugin,store,PlayerSaveCheckpoint::save);}
     public Mailbox(JavaPlugin plugin,PersistentStore store,java.util.function.Consumer<Player> save){this.plugin=plugin;this.store=store;this.save=save;stamp=new NamespacedKey("blastforge","delivery_batch");}
     public void savePlayer(Player player){save.accept(player);}
-    public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);plugin.getServer().getScheduler().runTaskTimer(plugin,()->plugin.getServer().getOnlinePlayers().forEach(this::deliver),100,100);}
+    public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);dev.duckmc.blastforge.Tasks.globalTimer(plugin,100,100,()->{for(Player p:plugin.getServer().getOnlinePlayers())dev.duckmc.blastforge.Tasks.now(plugin,p,()->deliver(p));});}
     public void queue(UUID player,UUID transaction,List<ItemStack> items,int levels){
         String key=player+":"+transaction;
         if(store.get("mailbox",key)!=null||store.get("mailbox_done",key)!=null||store.get("quarantine",key)!=null)return;
         store.put("mailbox",key,"P\n"+levels+"\n"+ItemCodec.encode(items));
         Player online=plugin.getServer().getPlayer(player);if(online!=null)deliver(online);
     }
-    @EventHandler public void join(PlayerJoinEvent event){plugin.getServer().getScheduler().runTask(plugin,()->deliver(event.getPlayer()));}
+    @EventHandler public void join(PlayerJoinEvent event){dev.duckmc.blastforge.Tasks.entity(plugin,event.getPlayer(),()->deliver(event.getPlayer()));}
     public void deliver(Player player){
         for(var entry:store.entries("mailbox").entrySet()){
             if(!entry.getKey().startsWith(player.getUniqueId()+":"))continue;

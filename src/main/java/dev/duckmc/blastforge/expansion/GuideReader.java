@@ -65,7 +65,7 @@ public final class GuideReader implements Listener,AutoCloseable {
     record Entry(String title,TextColor color,int page){}                    // contents entry -> first page of the chapter
 
     private final JavaPlugin plugin;private final GuideBook book;private final ExpansionItems items;
-    private final Map<UUID,Integer> lastSpread=new HashMap<>();
+    private final Map<UUID,Integer> lastSpread=new java.util.concurrent.ConcurrentHashMap<>();
     public GuideReader(JavaPlugin plugin,GuideBook book,ExpansionItems items){this.plugin=plugin;this.book=book;this.items=items;}
     public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);}
     @Override public void close(){HandlerList.unregisterAll(this);for(Player p:plugin.getServer().getOnlinePlayers())if(p.getOpenInventory().getTopInventory().getHolder() instanceof Holder)p.closeInventory();}
@@ -313,7 +313,7 @@ public final class GuideReader implements Listener,AutoCloseable {
         else if(slot==NEXT&&holder.spread<spreads(holder.layout)-1)target=holder.spread+1;
         else if(slot==CONTENTS)target=0;
         else{Integer chapter=contentsSlots(holder.layout,holder.spread).get(slot);if(chapter!=null)target=holder.layout.entries().get(chapter).page()/2;}
-        if(target!=null){int t=target;plugin.getServer().getScheduler().runTask(plugin,()->{if(player.isOnline())open(player,t);});
+        if(target!=null){int t=target;dev.duckmc.blastforge.Tasks.entity(plugin,player,()->{if(player.isOnline())open(player,t);});
             player.playSound(player.getLocation(),org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,1f,1f);}
     }
     @EventHandler public void drag(InventoryDragEvent event){if(event.getView().getTopInventory().getHolder() instanceof Holder)event.setCancelled(true);}

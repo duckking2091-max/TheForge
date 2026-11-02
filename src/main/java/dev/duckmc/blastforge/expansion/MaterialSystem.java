@@ -14,7 +14,6 @@ import org.bukkit.event.world.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,13 +27,13 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     private static final int CACHE_LIMIT=512,QUEUE_LIMIT=2048;
     private final JavaPlugin plugin;private final ExpansionItems items;private final Function<String,FileConfiguration> configs;private final PersistentStore store;
     private final MaterialRecipes recipes;
-    private final Map<String,Map<String,String>> cache=new LinkedHashMap<>(64,.75f,true) {
+    private final Map<String,Map<String,String>> cache=Collections.synchronizedMap(new LinkedHashMap<>(64,.75f,true) {
         @Override protected boolean removeEldestEntry(Map.Entry<String,Map<String,String>> entry){return size()>CACHE_LIMIT;}
-    };
+    });
     private final LinkedHashMap<String,PendingChunk> pending=new LinkedHashMap<>();
-    private final Map<String,ItemDisplay> displays=new HashMap<>();
-    private final Set<String> breaking=new HashSet<>();
-    private BukkitTask task;private boolean running;
+    private final Map<String,ItemDisplay> displays=new java.util.concurrent.ConcurrentHashMap<>();
+    private final Set<String> breaking=java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private dev.duckmc.blastforge.Tasks.Handle task;private volatile boolean running;
     private record PendingChunk(UUID world,int x,int z,boolean generate) {}
     public MaterialSystem(JavaPlugin plugin,ExpansionItems items,Function<String,FileConfiguration> configs,PersistentStore store) {
         this.plugin=plugin;this.items=items;this.configs=configs;this.store=store;this.recipes=new MaterialRecipes(plugin,items);
@@ -43,8 +42,8 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         if(running)return;running=true;
         plugin.getServer().getPluginManager().registerEvents(this,plugin);recipes.start();
         // Existing chunks rebuild owned displays only; never retrofit ore generation.
-        for(World world:plugin.getServer().getWorlds())for(Chunk chunk:world.getLoadedChunks())enqueue(chunk,false);
-        task=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tick,1,1);
+        if(!dev.duckmc.blastforge.Tasks.folia())for(World world:plugin.getServer().getWorlds())for(Chunk chunk:world.getLoadedChunks())enqueue(chunk,false);   // on Folia chunks are picked up as they load
+        task=dev.duckmc.blastforge.Tasks.globalTimer(plugin,1,1,this::tick);
     }
     private FileConfiguration cfg(){return configs.apply("materials");}
     private static String chunkKey(UUID world,int x,int z){return world+":"+x+":"+z;}
@@ -81,19 +80,25 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     }
     private void enqueue(Chunk chunk,boolean generate) {
         String key=chunkKey(chunk.getWorld().getUID(),chunk.getX(),chunk.getZ());
-        if(pending.size()>=QUEUE_LIMIT && !pending.containsKey(key))return;
-        PendingChunk before=pending.get(key);
-        pending.put(key,new PendingChunk(chunk.getWorld().getUID(),chunk.getX(),chunk.getZ(),generate || before!=null && before.generate()));
+        synchronized(pending){   // filled from every region's chunk-load events
+            if(pending.size()>=QUEUE_LIMIT && !pending.containsKey(key))return;
+            PendingChunk before=pending.get(key);
+            pending.put(key,new PendingChunk(chunk.getWorld().getUID(),chunk.getX(),chunk.getZ(),generate || before!=null && before.generate()));
+        }
     }
     private void tick() {
         int max=Math.clamp(cfg().getInt("generation.max-chunks-per-tick",2),1,8);
-        for(int i=0;i<max && !pending.isEmpty();i++) {
-            var iterator=pending.entrySet().iterator();PendingChunk entry=iterator.next().getValue();iterator.remove();
-            World world=plugin.getServer().getWorld(entry.world());
-            if(world==null || !world.isChunkLoaded(entry.x(),entry.z()))continue;
-            Chunk chunk=world.getChunkAt(entry.x(),entry.z());
-            if(entry.generate())generate(chunk);
-            rebuild(chunk);
+        var batch=new ArrayList<PendingChunk>();
+        synchronized(pending){for(int i=0;i<max && !pending.isEmpty();i++){var iterator=pending.entrySet().iterator();batch.add(iterator.next().getValue());iterator.remove();}}
+        for(PendingChunk entry:batch){
+            World world=plugin.getServer().getWorld(entry.world());if(world==null)continue;
+            // each chunk's ores are placed and drawn on the thread that owns that chunk
+            dev.duckmc.blastforge.Tasks.nowAt(plugin,new Location(world,entry.x()*16+8,64,entry.z()*16+8),()->{
+                if(!running || !world.isChunkLoaded(entry.x(),entry.z()))return;
+                Chunk chunk=world.getChunkAt(entry.x(),entry.z());
+                if(entry.generate())generate(chunk);
+                rebuild(chunk);
+            });
         }
     }
     private void generate(Chunk chunk) {
@@ -168,7 +173,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         ItemStack tool=event.getPlayer().getInventory().getItemInMainHand().clone();
         boolean rewards=event.getPlayer().getGameMode()!=GameMode.CREATIVE && canMine(block,tool);
         event.setDropItems(false);event.setExpToDrop(0);
-        plugin.getServer().getScheduler().runTask(plugin,()->{
+        dev.duckmc.blastforge.Tasks.at(plugin,block,()->{
             breaking.remove(position);
             if(event.isCancelled() || isCarrier(tier,block.getType()))return;
             // Remove persistent reward ownership before issuing the single custom drop.
@@ -255,12 +260,12 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     /** Spectators fly through rock, so they never see ore overlays at all. */
     private void visibility(Player viewer,ItemDisplay display){if(viewer.getGameMode()==GameMode.SPECTATOR)viewer.hideEntity(plugin,display);else viewer.showEntity(plugin,display);}
     private void refreshViewer(Player viewer){for(ItemDisplay display:displays.values())if(display.isValid()&&display.getWorld().equals(viewer.getWorld()))visibility(viewer,display);}
-    @EventHandler public void mode(org.bukkit.event.player.PlayerGameModeChangeEvent e){plugin.getServer().getScheduler().runTask(plugin,()->{if(e.getPlayer().isOnline())refreshViewer(e.getPlayer());});}
+    @EventHandler public void mode(org.bukkit.event.player.PlayerGameModeChangeEvent e){dev.duckmc.blastforge.Tasks.entity(plugin,e.getPlayer(),()->{if(e.getPlayer().isOnline())refreshViewer(e.getPlayer());});}
     @EventHandler public void joined(org.bukkit.event.player.PlayerJoinEvent e){refreshViewer(e.getPlayer());}
     @EventHandler public void worldChange(org.bukkit.event.player.PlayerChangedWorldEvent e){refreshViewer(e.getPlayer());}
     /** Mining or blowing up a neighbour can uncover an ore; give it its overlay then. */
     private void uncovered(Block changed){
-        plugin.getServer().getScheduler().runTask(plugin,()->{
+        dev.duckmc.blastforge.Tasks.at(plugin,changed,()->{
             for(var face:List.of(org.bukkit.block.BlockFace.UP,org.bukkit.block.BlockFace.DOWN,org.bukkit.block.BlockFace.NORTH,org.bukkit.block.BlockFace.SOUTH,org.bukkit.block.BlockFace.EAST,org.bukkit.block.BlockFace.WEST)){
                 Block n=changed.getRelative(face);String key=n.getWorld().getUID()+":"+local(n);
                 if(!displays.containsKey(key)&&isOre(n)&&exposed(n)){Chunk chunk=n.getChunk();rebuild(chunk);return;}
@@ -276,7 +281,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     // Siftie (deepslate-diamond-ore carrier, hardness 4.5): 10 s with netherite Eff V.
     // Enderite (ancient-debris carrier, hardness 30): 20 s with netherite Eff V, 15 s with a Siftie (or better) pickaxe Eff V.
     private static final NamespacedKey SLOW=ExpansionItems.key("ore_mining_time");
-    private final Set<UUID> slowed=new HashSet<>();
+    private final Set<UUID> slowed=java.util.concurrent.ConcurrentHashMap.newKeySet();
     double multiplier(String tier,Player player,ItemStack tool){return multiplier(tier,player,tool,tier.equals("siftie")?4.5:30);}
     double multiplier(String tier,Player player,ItemStack tool,double hardness){
         if(tier.equals("siftie"))return hardness*30/(20.0*cfg().getDouble("mining-seconds.siftie",10)*35);
@@ -328,7 +333,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         }
     }
     @EventHandler public void unloaded(ChunkUnloadEvent event) {
-        Chunk chunk=event.getChunk();String key=chunkKey(chunk.getWorld().getUID(),chunk.getX(),chunk.getZ());pending.remove(key);cache.remove(key);
+        Chunk chunk=event.getChunk();String key=chunkKey(chunk.getWorld().getUID(),chunk.getX(),chunk.getZ());synchronized(pending){pending.remove(key);}cache.remove(key);
         var iterator=displays.values().iterator();while(iterator.hasNext()) {ItemDisplay display=iterator.next();if(display.getWorld().equals(chunk.getWorld()) && (display.getLocation().getBlockX()>>4)==chunk.getX() && (display.getLocation().getBlockZ()>>4)==chunk.getZ()){display.remove();iterator.remove();}}
     }
     @Override public void close() {running=false;for(Player p:plugin.getServer().getOnlinePlayers())clearSlow(p);if(task!=null)task.cancel();HandlerList.unregisterAll(this);recipes.close();for(ItemDisplay display:displays.values())display.remove();displays.clear();pending.clear();cache.clear();breaking.clear();}

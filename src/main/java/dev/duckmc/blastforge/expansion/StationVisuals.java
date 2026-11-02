@@ -12,7 +12,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -23,15 +22,15 @@ import java.util.function.Function;
 public final class StationVisuals implements Listener,AutoCloseable {
     private static final NamespacedKey OWNER=new NamespacedKey("blastforge","visual_owner");
     private final JavaPlugin plugin;private final ExpansionItems items;private final Function<String,FileConfiguration> configs;
-    private final Map<String,Parts> stations=new LinkedHashMap<>();private final LinkedHashSet<String> pending=new LinkedHashSet<>();
-    private final Map<String,Integer> strikes=new HashMap<>();
+    private final Map<String,Parts> stations=new java.util.concurrent.ConcurrentHashMap<>();private final Set<String> pending=Collections.synchronizedSet(new LinkedHashSet<>());
+    private final Map<String,Integer> strikes=new java.util.concurrent.ConcurrentHashMap<>();
     /* Rune hearth animation per station: [tick, duration]; duration 0 = completion flash. */
-    private final Map<String,int[]> heat=new HashMap<>();
-    private static final int IDLE_LIGHT=6,FLASH_TICKS=8;private PackVisuals pack;private BukkitTask task;private boolean closed;private long generation;
+    private final Map<String,int[]> heat=new java.util.concurrent.ConcurrentHashMap<>();
+    private static final int IDLE_LIGHT=6,FLASH_TICKS=8;private PackVisuals pack;private dev.duckmc.blastforge.Tasks.Handle task;private volatile boolean closed;private volatile long generation;
     private record Parts(Location location,float yaw,List<ItemDisplay> entities){}
     public StationVisuals(JavaPlugin plugin,ExpansionItems items,Function<String,FileConfiguration> configs){this.plugin=plugin;this.items=items;this.configs=configs;}
     public void pack(PackVisuals value){pack=value;if(value!=null)value.onStatusChange(this::visibility);}
-    public void start(){if(task!=null)return;closed=false;generation++;plugin.getServer().getPluginManager().registerEvents(this,plugin);for(World world:plugin.getServer().getWorlds())for(Chunk chunk:world.getLoadedChunks())enqueue(chunk);task=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tick,1,1);}
+    public void start(){if(task!=null)return;closed=false;generation++;plugin.getServer().getPluginManager().registerEvents(this,plugin);if(!dev.duckmc.blastforge.Tasks.folia())for(World world:plugin.getServer().getWorlds())for(Chunk chunk:world.getLoadedChunks())enqueue(chunk);task=dev.duckmc.blastforge.Tasks.globalTimer(plugin,1,1,this::tick);}
     private static String key(Block b){return b.getWorld().getUID()+":"+b.getX()+":"+b.getY()+":"+b.getZ();}
     static boolean marked(Block block){return Tag.ANVIL.isTagged(block.getType())&&block.getChunk().getPersistentDataContainer().has(new NamespacedKey("blastforge","station_"+(block.getX()&15)+"_"+block.getY()+"_"+(block.getZ()&15)),PersistentDataType.BYTE);}
     public void placed(Block block){
@@ -75,24 +74,29 @@ public final class StationVisuals implements Listener,AutoCloseable {
             parts.entities().get(i).setInterpolationDelay(0);parts.entities().get(i).setTransformation(new Transformation(translation,rotation,new Vector3f(1),new Quaternionf()));
         }
     }
+    /** Global tick: hands each anvil's work (building its parts, its hearth animation) to the region that owns it. */
     private void tick(){
         if(closed)return;
-        int budget=16;for(Iterator<String> it=pending.iterator();it.hasNext()&&budget-->0;){if(stations.size()*3+3>configs.apply("config").getInt("visuals.max-station-displays",128))break;String next=it.next();it.remove();Location loc=location(next);if(loc!=null&&loc.getWorld().isChunkLoaded(loc.getBlockX()>>4,loc.getBlockZ()>>4))placed(loc.getBlock());}
+        var batch=new ArrayList<String>();
+        synchronized(pending){int budget=16;for(Iterator<String> it=pending.iterator();it.hasNext()&&budget-->0;){if(stations.size()*3+3>configs.apply("config").getInt("visuals.max-station-displays",128))break;batch.add(it.next());it.remove();}}
+        for(String next:batch){Location loc=location(next);if(loc!=null)dev.duckmc.blastforge.Tasks.nowAt(plugin,loc,()->{if(closed)return;if(loc.getWorld().isChunkLoaded(loc.getBlockX()>>4,loc.getBlockZ()>>4))placed(loc.getBlock());});}
         strikes.clear();
-        for(var entry:new ArrayList<>(heat.entrySet())){
-            Parts part=stations.get(entry.getKey());if(part==null){heat.remove(entry.getKey());continue;}int[] h=entry.getValue();int tick=h[0]++;
-            if(h[1]==0){ /* completion flash, then back to idle */
-                if(tick<FLASH_TICKS)glow(part,15,1f+.14f*(FLASH_TICKS-tick)/FLASH_TICKS);else{glow(part,IDLE_LIGHT,1f);heat.remove(entry.getKey());}continue;}
-            double p=Math.min(1,tick/(double)h[1]);
-            /* gradually brighter, with a pulse that quickens as it heats */
-            int light=(int)Math.round(IDLE_LIGHT+(15-IDLE_LIGHT)*p+Math.sin(tick*(.35+.5*p))*2*(1-p*.5));
-            glow(part,light,1f+.03f*(float)Math.sin(tick*.5));
-            Location top=part.location().clone().add(0,1.15,0);
-            if(tick%3==0)top.getWorld().spawnParticle(Particle.SMALL_FLAME,top,1+(int)(p*3),.12,.02,.12,.02);
-            if(tick%5==0)top.getWorld().spawnParticle(Particle.LAVA,top,1,.1,0,.1,0);
-            if(tick%2==0&&p>.5)top.getWorld().spawnParticle(Particle.ELECTRIC_SPARK,top.clone().add(0,.1,0),2,.15,.1,.15,.05);
-            if(tick>=h[1])heat.remove(entry.getKey()); /* completion arrives separately as heat(location,0) */
-        }
+        for(String key:new ArrayList<>(heat.keySet())){Parts part=stations.get(key);if(part==null){heat.remove(key);continue;}dev.duckmc.blastforge.Tasks.nowAt(plugin,part.location(),()->animate(key));}
+    }
+    /** One step of an anvil's rune-hearth animation, on the thread that owns the anvil. */
+    private void animate(String key){
+        if(closed)return;Parts part=stations.get(key);int[] h=heat.get(key);if(part==null||h==null){heat.remove(key);return;}int tick=h[0]++;
+        if(h[1]==0){ /* completion flash, then back to idle */
+            if(tick<FLASH_TICKS)glow(part,15,1f+.14f*(FLASH_TICKS-tick)/FLASH_TICKS);else{glow(part,IDLE_LIGHT,1f);heat.remove(key);}return;}
+        double p=Math.min(1,tick/(double)h[1]);
+        /* gradually brighter, with a pulse that quickens as it heats */
+        int light=(int)Math.round(IDLE_LIGHT+(15-IDLE_LIGHT)*p+Math.sin(tick*(.35+.5*p))*2*(1-p*.5));
+        glow(part,light,1f+.03f*(float)Math.sin(tick*.5));
+        Location top=part.location().clone().add(0,1.15,0);
+        if(tick%3==0)top.getWorld().spawnParticle(Particle.SMALL_FLAME,top,1+(int)(p*3),.12,.02,.12,.02);
+        if(tick%5==0)top.getWorld().spawnParticle(Particle.LAVA,top,1,.1,0,.1,0);
+        if(tick%2==0&&p>.5)top.getWorld().spawnParticle(Particle.ELECTRIC_SPARK,top.clone().add(0,.1,0),2,.15,.1,.15,.05);
+        if(tick>=h[1])heat.remove(key); /* completion arrives separately as heat(location,0) */
     }
     private Location location(String key){try{String[] p=key.split(":");World world=plugin.getServer().getWorld(UUID.fromString(p[0]));return world==null?null:new Location(world,Integer.parseInt(p[1]),Integer.parseInt(p[2]),Integer.parseInt(p[3]));}catch(IllegalArgumentException e){return null;}}
     private void show(Player player,Parts parts){for(Entity entity:parts.entities())if(pack!=null&&pack.loaded(player))player.showEntity(plugin,entity);else player.hideEntity(plugin,entity);}
@@ -108,10 +112,10 @@ public final class StationVisuals implements Listener,AutoCloseable {
     @EventHandler public void unload(ChunkUnloadEvent event){Chunk chunk=event.getChunk();for(var entry:new ArrayList<>(stations.entrySet())){Location l=entry.getValue().location();if(l.getWorld().equals(chunk.getWorld())&&(l.getBlockX()>>4)==chunk.getX()&&(l.getBlockZ()>>4)==chunk.getZ())remove(entry.getKey());}}
     @EventHandler public void unload(WorldUnloadEvent event){for(var e:new ArrayList<>(stations.entrySet()))if(e.getValue().location().getWorld().equals(event.getWorld()))remove(e.getKey());}
     @EventHandler public void join(PlayerJoinEvent event){visibility(event.getPlayer());}
-    private void later(Runnable action){long expected=generation;plugin.getServer().getScheduler().runTask(plugin,()->{if(!closed&&generation==expected)action.run();});}
-    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void place(BlockPlaceEvent event){later(()->{if(!event.isCancelled())placed(event.getBlockPlaced());});}
-    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void breakBlock(BlockBreakEvent event){later(()->{if(!event.isCancelled()&&!marked(event.getBlock()))removed(event.getBlock());});}
-    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void explode(EntityExplodeEvent event){for(Block block:List.copyOf(event.blockList()))later(()->{if(!event.isCancelled()&&!marked(block))removed(block);});}
-    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void explode(BlockExplodeEvent event){for(Block block:List.copyOf(event.blockList()))later(()->{if(!event.isCancelled()&&!marked(block))removed(block);});}
+    private void later(org.bukkit.block.Block at,Runnable action){long expected=generation;dev.duckmc.blastforge.Tasks.at(plugin,at,()->{if(!closed&&generation==expected)action.run();});}
+    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void place(BlockPlaceEvent event){later(event.getBlockPlaced(),()->{if(!event.isCancelled())placed(event.getBlockPlaced());});}
+    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void breakBlock(BlockBreakEvent event){later(event.getBlock(),()->{if(!event.isCancelled()&&!marked(event.getBlock()))removed(event.getBlock());});}
+    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void explode(EntityExplodeEvent event){for(Block block:List.copyOf(event.blockList()))later(block,()->{if(!event.isCancelled()&&!marked(block))removed(block);});}
+    @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true) public void explode(BlockExplodeEvent event){for(Block block:List.copyOf(event.blockList()))later(block,()->{if(!event.isCancelled()&&!marked(block))removed(block);});}
     @Override public void close(){closed=true;generation++;if(task!=null){task.cancel();task=null;}stations.values().forEach(s->s.entities().forEach(Entity::remove));stations.clear();pending.clear();strikes.clear();heat.clear();HandlerList.unregisterAll(this);}
 }

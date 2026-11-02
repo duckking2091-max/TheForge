@@ -11,7 +11,6 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 import java.util.function.*;
 
@@ -34,9 +33,9 @@ final class WorkshopMenu implements Listener {
     private final ExtractionMenu extraction;
     private final BiConsumer<Player,Location> nativeAnvil;
     private final Predicate<Location> station;
-    private final Map<UUID,Session> sessions=new HashMap<>();
-    private final Map<UUID,Craft> crafts=new HashMap<>();
-    private final Set<String> busy=new HashSet<>();
+    private final Map<UUID,Session> sessions=new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID,Craft> crafts=new java.util.concurrent.ConcurrentHashMap<>();
+    private final Set<String> busy=java.util.concurrent.ConcurrentHashMap.newKeySet();
     private BiConsumer<Location,String> strike=(l,t)->{};
     private PackVisuals pack;
     private final class Session implements InventoryHolder {
@@ -49,7 +48,7 @@ final class WorkshopMenu implements Listener {
         String stationKey(){return location==null?"virtual:"+player.getUniqueId():location.getWorld().getUID()+":"+location.getBlockX()+":"+location.getBlockY()+":"+location.getBlockZ();}
         List<ItemStack> owned(){var result=new ArrayList<ItemStack>();for(var values:buffers.values())values.values().forEach(i->{if(i!=null&&!i.getType().isAir())result.add(i.clone());});ItemStack cursor=player.getItemOnCursor();if(!cursor.getType().isAir())result.add(cursor.clone());return result;}
     }
-    private record Craft(UUID id,UUID owner,String key,Location location,UUID scythe,List<ItemStack> consumed,List<ItemStack> outputs,int levels,Session session,BukkitTask task){}
+    private record Craft(UUID id,UUID owner,String key,Location location,UUID scythe,List<ItemStack> consumed,List<ItemStack> outputs,int levels,Session session,dev.duckmc.blastforge.Tasks.Handle task){}
     WorkshopMenu(JavaPlugin plugin,ExpansionItems items,Function<String,FileConfiguration> configs,PersistentStore store,Mailbox mailbox,ExtractionMenu extraction,BiConsumer<Player,Location> nativeAnvil,Predicate<Location> station){this.plugin=plugin;this.items=items;this.configs=configs;this.store=store;this.mailbox=mailbox;this.extraction=extraction;this.nativeAnvil=nativeAnvil;this.station=station;}
     void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);recover();}
     void strikeHandler(BiConsumer<Location,String> handler){strike=handler;}
@@ -162,9 +161,9 @@ final class WorkshopMenu implements Listener {
         int raw=event.getRawSlot();ClickType click=event.getClick();
         if(click!=ClickType.LEFT&&click!=ClickType.RIGHT&&click!=ClickType.SHIFT_LEFT&&click!=ClickType.SHIFT_RIGHT)return;
         if(raw>=TABS&&raw<=TABS+2){if(s.running!=null)return;s.tab=Tab.values()[raw-TABS];draw(s);return;}
-        if(raw==53){plugin.getServer().getScheduler().runTask(plugin,()->s.player.closeInventory());return;}
+        if(raw==53){dev.duckmc.blastforge.Tasks.entity(plugin,s.player,()->s.player.closeInventory());return;}
         if(s.uncertain)return;
-        if(raw==8){if(s.running!=null||s.tab!=Tab.FORGING)return;plugin.getServer().getScheduler().runTask(plugin,()->{if(!s.closed)nativeAnvil.accept(s.player,s.location);});return;}
+        if(raw==8){if(s.running!=null||s.tab!=Tab.FORGING)return;dev.duckmc.blastforge.Tasks.entity(plugin,s.player,()->{if(!s.closed)nativeAnvil.accept(s.player,s.location);});return;}
         if(s.tab==Tab.RITUAL?raw==CONFIRM||raw==CENTER:raw==RESULT){confirm(s);return;} /* clicking the result works like vanilla */
         if(s.running!=null)return;
         if(event.isShiftClick()){
@@ -195,7 +194,7 @@ final class WorkshopMenu implements Listener {
                 int n=Math.min(click==ClickType.RIGHT?1:cursor.getAmount(),cursor.getMaxStackSize()-(value==null?0:value.getAmount()));if(n<=0)return;var placed=cursor.clone();placed.setAmount(n+(value==null?0:value.getAmount()));s.player.getInventory().setItem(event.getSlot(),placed);cursor.setAmount(cursor.getAmount()-n);s.player.setItemOnCursor(cursor.getAmount()==0?null:cursor);
             }else{s.player.getInventory().setItem(event.getSlot(),cursor);s.player.setItemOnCursor(value);}
         }else return;
-        checkpoint(s);draw(s);plugin.getServer().getScheduler().runTask(plugin,s.player::updateInventory);
+        checkpoint(s);draw(s);dev.duckmc.blastforge.Tasks.entity(plugin,s.player,s.player::updateInventory);
     }
     private static void decrease(Map<Integer,ItemStack> map,int slot,int n){ItemStack value=map.get(slot);if(value==null)return;value.setAmount(value.getAmount()-n);if(value.getAmount()<=0)map.remove(slot);}
     private void checkpoint(Session s){
@@ -223,7 +222,7 @@ final class WorkshopMenu implements Listener {
         store.put("transactions",tx.toString(),payload("R",s.player.getUniqueId(),levels,scythe,consumed,List.of(output)));
         s.running=tx;busy.add(s.stationKey());Location effect=s.location==null?s.player.getLocation():s.location;final UUID reserved=scythe;final String material=tier;final int duration=seconds*20;
         if(s.location!=null&&duration>0)heat.accept(s.location,duration);
-        final int[] tick={0};BukkitTask task=plugin.getServer().getScheduler().runTaskTimer(plugin,()->{
+        final int[] tick={0};dev.duckmc.blastforge.Tasks.Handle task=dev.duckmc.blastforge.Tasks.entityTimer(plugin,s.player,1,1,self->{   // on the crafting player's own thread
             Craft craft=crafts.get(tx);if(craft==null)return;
             if(s.closed||!s.player.isOnline()||s.location!=null&&!station.test(s.location)){abort(craft);return;}
             if(duration>0&&(tick[0]==0||tick[0]==duration/3||tick[0]==2*duration/3)){strike.accept(effect,material);effect.getWorld().playSound(effect,Sound.BLOCK_ANVIL_USE,0.7f,1);effect.getWorld().spawnParticle(Particle.ELECTRIC_SPARK,effect.clone().add(.5,1,.5),12,.3,.3,.3,.03);}
@@ -232,7 +231,7 @@ final class WorkshopMenu implements Listener {
                 crafts.remove(tx);busy.remove(s.stationKey());s.running=null;craft.task().cancel();
                 store.remove("transactions",tx.toString());mailbox.deliver(s.player);if(s.location!=null)heat.accept(s.location,0);draw(s);notice(s.player,"transaction-complete","Forging complete. Your result is in your inventory or mailbox.",Map.of());
             }
-        },1,1);
+        },()->{Craft gone=crafts.get(tx);if(gone!=null)abort(gone);});   // player removed: return the inputs
         crafts.put(tx,new Craft(tx,s.player.getUniqueId(),s.stationKey(),effect,reserved,consumed,List.of(output),levels,s,task));draw(s);
     }
     int maximumScythes(){String stored=store.get("settings","scythe_limit");return Math.max(0,stored==null?configs.apply("scythe").getInt("maximum-scythes",1):Integer.parseInt(stored));}

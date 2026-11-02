@@ -19,7 +19,6 @@ import org.bukkit.inventory.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.*;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.*;
 import org.bukkit.util.Vector;
 import java.util.*;
@@ -31,8 +30,14 @@ public final class MagicSystem implements Listener,AutoCloseable {
     private final JavaPlugin plugin;private final ExpansionItems items;private final Function<String,FileConfiguration> configs;
     private final PersistentStore store;private final ExpansionProtection protection;private final MagicCooldowns cooldowns;
     private final MagicPassives passives;private final MagicFlights flights;private final MagicTerrain terrain;private final MagicSummons summons;
-    private final List<Effect> effects=new ArrayList<>();private final Map<UUID,Integer> dispatched=new HashMap<>();private final Map<UUID,Long> feedback=new HashMap<>();
-    private BukkitTask task;private long ticks;private int internalDamage;private boolean closed;
+    /** Each player's running spell effects, touched only on that player's own thread (their region on Folia). */
+    private final Map<UUID,List<Effect>> effects=new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID,Integer> dispatched=new java.util.concurrent.ConcurrentHashMap<>();private final Map<UUID,Long> feedback=new java.util.concurrent.ConcurrentHashMap<>();
+    /** One repeating task per online player (follows them between regions), plus one global task. */
+    private final Map<UUID,dev.duckmc.blastforge.Tasks.Handle> playerTasks=new java.util.concurrent.ConcurrentHashMap<>();
+    private void addEffect(Effect effect){effects.computeIfAbsent(effect.owner(),k->new java.util.concurrent.CopyOnWriteArrayList<>()).add(effect);}
+    private int effectCount(){int n=0;for(var list:effects.values())n+=list.size();return n;}
+    private dev.duckmc.blastforge.Tasks.Handle task;private long ticks;private final dev.duckmc.blastforge.Reentry internalDamage=new dev.duckmc.blastforge.Reentry();private boolean closed;
     private interface Effect {UUID owner();boolean tick();default void close(){}}
     public MagicSystem(JavaPlugin plugin,ExpansionItems items,Function<String,FileConfiguration> configs,PersistentStore store,ExpansionProtection protection){
         this.plugin=plugin;this.items=items;this.configs=configs;this.store=store;this.protection=protection;
@@ -41,7 +46,14 @@ public final class MagicSystem implements Listener,AutoCloseable {
     }
     public void start(){if(task!=null)return;closed=false;var manager=plugin.getServer().getPluginManager();manager.registerEvents(this,plugin);manager.registerEvents(terrain,plugin);manager.registerEvents(summons,plugin);
         summons.cleanupLoaded();for(Player p:Bukkit.getOnlinePlayers()){flights.reconcile(p);passives.scan(p);}
-        task=plugin.getServer().getScheduler().runTaskTimer(plugin,this::pump,1,1);
+        task=dev.duckmc.blastforge.Tasks.globalTimer(plugin,1,1,this::globalPump);
+        for(Player p:Bukkit.getOnlinePlayers())startPlayer(p);
+    }
+    /** Starts the player's own tick (spells, flight, cooldown bar, passives) on the thread that owns the player. */
+    private void startPlayer(Player p){
+        if(closed)return;var old=playerTasks.remove(p.getUniqueId());if(old!=null)old.cancel();
+        UUID id=p.getUniqueId();
+        playerTasks.put(id,dev.duckmc.blastforge.Tasks.entityTimer(plugin,p,1,1,handle->{if(closed||!p.isOnline()){handle.cancel();return;}playerPump(p);},()->playerTasks.remove(id)));
     }
     private FileConfiguration magic(){return configs.apply("magic");}
     private String path(String item,int ability){if(item.equals("wind_book") && ability>0)ability=3-ability;   /* suffocation = "third", wind charge = "secondary" */
@@ -53,7 +65,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
     private String activeItem(Player p){String id=items.id(p.getInventory().getItemInMainHand());return switch(id){case "fire_book","water_book","earth_book","wind_book","darkness_book"->id;case "legendary_scythe"->validScythe(p.getInventory().getItemInMainHand())?id:"";default->"";};}
     private boolean supported(String id,int ability){return !id.isEmpty() && ability>=0 && ability<3 && !(id.equals("earth_book") && ability==2);}
     private boolean dispatch(Player p,int ability){String id=activeItem(p);if(!supported(id,ability))return false;
-        int tick=Bukkit.getCurrentTick();if(Objects.equals(dispatched.put(p.getUniqueId(),tick),tick))return true;
+        int tick=dev.duckmc.blastforge.Tasks.tick();if(Objects.equals(dispatched.put(p.getUniqueId(),tick),tick))return true;
         activate(p,ability);return true;
     }
     /** One activation path for every control route; success alone commits its persistent cooldown. */
@@ -61,7 +73,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         String id=activeItem(p);if(closed || !magic().getBoolean("enabled",true) || !supported(id,ability) || p.isDead() || p.getGameMode()==GameMode.SPECTATOR || !p.hasPermission("blastforge.use") || !protection.canAffect(p,p.getLocation()))return false;
         long now=System.currentTimeMillis(),remaining=cooldowns.remaining(p.getUniqueId(),id,ability,now);
         if(remaining>0){if(feedback.getOrDefault(p.getUniqueId(),0L)<now){p.playSound(p.getLocation(),Sound.BLOCK_NOTE_BLOCK_BASS,.4f,.7f);feedback.put(p.getUniqueId(),now+750);}hud(p,now);return false;}
-        if(effects.size()>=128 || effects.stream().filter(e->e.owner().equals(p.getUniqueId())).count()>=8)return false;
+        if(effectCount()>=128 || effects.getOrDefault(p.getUniqueId(),List.of()).size()>=8)return false;
         boolean result=switch(id){
             case "fire_book"->fire(p,ability);case "water_book"->water(p,ability);case "earth_book"->earth(p,ability);
             case "wind_book"->wind(p,ability);case "darkness_book"->darkness(p,ability);case "legendary_scythe"->scythe(p,ability);default->false;
@@ -71,7 +83,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         }return result;
     }
     @EventHandler(priority=EventPriority.HIGHEST) public void interact(PlayerInteractEvent e){
-        if(e.getHand()!=EquipmentSlot.HAND || internalDamage>0)return;Action action=e.getAction();boolean right=action==Action.RIGHT_CLICK_AIR || action==Action.RIGHT_CLICK_BLOCK;
+        if(e.getHand()!=EquipmentSlot.HAND || internalDamage.active())return;Action action=e.getAction();boolean right=action==Action.RIGHT_CLICK_AIR || action==Action.RIGHT_CLICK_BLOCK;
         boolean left=action==Action.LEFT_CLICK_AIR || action==Action.LEFT_CLICK_BLOCK;if(!right && !left || left && !e.getPlayer().isSneaking())return;
         if(e.hasBlock() && (e.useInteractedBlock()==Event.Result.DENY || e.useItemInHand()==Event.Result.DENY))return;
         int ability=right?(e.getPlayer().isSneaking()?1:0):2;if(dispatch(e.getPlayer(),ability)){e.setUseItemInHand(Event.Result.DENY);e.setUseInteractedBlock(Event.Result.DENY);}
@@ -79,7 +91,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void entityInteract(PlayerInteractEntityEvent e){if(e.getHand()==EquipmentSlot.HAND && dispatch(e.getPlayer(),e.getPlayer().isSneaking()?1:0))e.setCancelled(true);}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void entityInteractAt(PlayerInteractAtEntityEvent e){if(e.getHand()==EquipmentSlot.HAND && dispatch(e.getPlayer(),e.getPlayer().isSneaking()?1:0))e.setCancelled(true);}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void swing(PlayerArmSwingEvent e){if(e.getHand()==EquipmentSlot.HAND && e.getPlayer().isSneaking() && dispatch(e.getPlayer(),2))e.setCancelled(true);}
-    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void attackControl(EntityDamageByEntityEvent e){if(internalDamage==0 && e.getDamager() instanceof Player p && p.isSneaking() && dispatch(p,2))e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void attackControl(EntityDamageByEntityEvent e){if(!internalDamage.active() && e.getDamager() instanceof Player p && p.isSneaking() && dispatch(p,2))e.setCancelled(true);}
 
     private abstract class OwnedEffect implements Effect {
         final UUID owner,world;int age;final int duration;
@@ -97,7 +109,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
     }
     private List<LivingEntity> enemies(Player caster,Location at,double radius){return at.getWorld().getNearbyLivingEntities(at,radius,target->at.distanceSquared(target.getLocation())<=radius*radius && enemy(caster,target)).stream().limit(32).toList();}
     private LivingEntity target(Player caster,double range){RayTraceResult hit=caster.getWorld().rayTrace(caster.getEyeLocation(),caster.getEyeLocation().getDirection(),range,FluidCollisionMode.NEVER,true,.3,e->e instanceof LivingEntity l && enemy(caster,l));return hit!=null && hit.getHitEntity() instanceof LivingEntity living?living:null;}
-    private void damage(Player caster,LivingEntity target,double amount){if(!enemy(caster,target))return;internalDamage++;try{target.damage(bounded(amount,0,200),DamageSource.builder(DamageType.PLAYER_ATTACK).withCausingEntity(caster).withDirectEntity(caster).withDamageLocation(caster.getLocation()).build());}finally{internalDamage--;}}
+    private void damage(Player caster,LivingEntity target,double amount){if(!enemy(caster,target))return;internalDamage.enter();try{target.damage(bounded(amount,0,200),DamageSource.builder(DamageType.PLAYER_ATTACK).withCausingEntity(caster).withDirectEntity(caster).withDamageLocation(caster.getLocation()).build());}finally{internalDamage.exit();}}
     private boolean fire(Player p,int ability){String id="fire_book";
         if(ability==0){
             // Fire Field: real fire blocks (as from flint and steel) on the ground between 2 and 5 blocks around the caster.
@@ -115,7 +127,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         if(ability==1){
             // Fire Ring: a continuous circle of flames that follows the caster and marks the exact damage radius.
             double radius=bounded(value(id,1,"radius",3),1,8);int life=duration(id,1,5);Map<UUID,Integer> hit=new HashMap<>();Set<UUID> inside=new HashSet<>();
-            effects.add(new OwnedEffect(p,life){boolean step(Player caster){Location center=caster.getLocation();if(!protection.canAffect(caster,center))return false;
+            addEffect(new OwnedEffect(p,life){boolean step(Player caster){Location center=caster.getLocation();if(!protection.canAffect(caster,center))return false;
                 if(age%3==1)ring(center,radius,Particle.FLAME,.15);
                 if(age%5==1){Set<UUID> now=new HashSet<>();
                     for(LivingEntity target:inside(caster,center,radius)){now.add(target.getUniqueId());if(hit.getOrDefault(target.getUniqueId(),-20)<=age-20){damage(caster,target,value(id,1,"damage",2));hit.put(target.getUniqueId(),age);}}
@@ -175,7 +187,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
     }
     /** Mobs that Harming heals instead of hurting. */
     static boolean undead(LivingEntity t){return dev.duckmc.blastforge.Compat.undead(t);}
-    private final Map<UUID,Map<UUID,Integer>> breathHits=new HashMap<>();
+    private final Map<UUID,Map<UUID,Integer>> breathHits=new java.util.concurrent.ConcurrentHashMap<>();
     /**
      * Who the breath cloud may hurt: never its caster, players only with PvP, nothing inside protected regions.
      * Harming heals undead (zombies, skeletons, drowned...), so those take the same 6 damage directly instead,
@@ -185,11 +197,11 @@ public final class MagicSystem implements Listener,AutoCloseable {
         String owner=e.getEntity().getPersistentDataContainer().get(BREATH,PersistentDataType.STRING);if(owner==null)return;
         Player caster=Bukkit.getPlayer(UUID.fromString(owner));if(caster==null){e.getAffectedEntities().clear();return;}
         e.getAffectedEntities().removeIf(target->target.equals(caster) || target instanceof Player && (!magic().getBoolean("pvp",true) || !caster.getWorld().getPVP()) || !protection.canDamage(caster,target) || !protection.canAffect(caster,target.getLocation()));
-        var hits=breathHits.computeIfAbsent(e.getEntity().getUniqueId(),k->new HashMap<>());int now=Bukkit.getCurrentTick();
+        var hits=breathHits.computeIfAbsent(e.getEntity().getUniqueId(),k->new java.util.concurrent.ConcurrentHashMap<>());int now=dev.duckmc.blastforge.Tasks.tick();
         for(var it=e.getAffectedEntities().iterator();it.hasNext();){LivingEntity target=it.next();
             if(!undead(target))continue;it.remove();
             if(hits.getOrDefault(target.getUniqueId(),-20)>now-20)continue;hits.put(target.getUniqueId(),now);
-            internalDamage++;try{target.damage(6,DamageSource.builder(DamageType.INDIRECT_MAGIC).withCausingEntity(caster).withDirectEntity(e.getEntity()).build());}finally{internalDamage--;}
+            internalDamage.enter();try{target.damage(6,DamageSource.builder(DamageType.INDIRECT_MAGIC).withCausingEntity(caster).withDirectEntity(e.getEntity()).build());}finally{internalDamage.exit();}
         }
         if(breathHits.size()>64)breathHits.keySet().removeIf(id->Bukkit.getEntity(id)==null);
     }
@@ -197,7 +209,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
     /** Simulated projectiles have no native explosion, ignition, loot or cloud side effects to leak past protection. */
     private boolean projectile(Player p,Particle particle,double range,double speed,double width,Impact impact){
         Location start=p.getEyeLocation().clone();Vector direction=start.getDirection().normalize();if(!protection.canAffect(p,start))return false;
-        effects.add(new OwnedEffect(p,(int)Math.ceil(range/speed)+2){Location at=start;double travelled;
+        addEffect(new OwnedEffect(p,(int)Math.ceil(range/speed)+2){Location at=start;double travelled;
             boolean step(Player caster){double distance=Math.min(speed,range-travelled);if(distance<=0)return false;
                 Location next=at.clone().add(direction.clone().multiply(distance));if(!protection.canAffect(caster,next))return false;
                 RayTraceResult hit=at.getWorld().rayTrace(at,direction,distance,FluidCollisionMode.NEVER,true,width,e->e instanceof LivingEntity living && !e.equals(caster) && living.isValid());
@@ -219,7 +231,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
             p.setVelocity(new Vector(p.getVelocity().getX(),bounded(value(id,0,"launch-velocity",1.1),.2,2),p.getVelocity().getZ()));
             // a burst where the jump starts, then a stream of bubbles that follows the player up until they stop rising
             bubbles(start,24,.6);sound(start,Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE,1f,1f);sound(start,Sound.ENTITY_PLAYER_SPLASH,.6f,1.2f);
-            effects.add(new OwnedEffect(p,30){double lastY=start.getY();boolean step(Player caster){Location at=caster.getLocation();
+            addEffect(new OwnedEffect(p,30){double lastY=start.getY();boolean step(Player caster){Location at=caster.getLocation();
                 trail(at.clone().add(0,-.6,0),at.clone().add(0,.4,0),Particle.BUBBLE_POP,3);bubbles(at.clone().add(0,.2,0),3,.25);
                 boolean rising=at.getY()>lastY+.02;lastY=at.getY();return rising || age<3;}});return true;}
         if(ability==1)return summons.summon(p,false,value(id,1,"duration",60),(int)value(id,1,"count",3));
@@ -235,7 +247,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         if(p.isSneaking())p.sendActionBar(Component.text("Release Shift to throw the water.",NamedTextColor.AQUA));
         double range=24,speed=.9;int maxHold=200;
         boolean[] released={false};heldWater.put(p.getUniqueId(),()->released[0]=true);
-        effects.add(new OwnedEffect(p,maxHold+12+(int)Math.ceil(range/speed)){Location at=from.clone();Vector dir;double travelled;int launchedAt=-1;
+        addEffect(new OwnedEffect(p,maxHold+12+(int)Math.ceil(range/speed)){Location at=from.clone();Vector dir;double travelled;int launchedAt=-1;
             boolean step(Player caster){if(!orb.isValid())return false;
                 if(launchedAt<0){
                     // held: rise to (and stay) in front of the caster, following their aim
@@ -259,11 +271,11 @@ public final class MagicSystem implements Listener,AutoCloseable {
         return true;
     }
     /** Players currently holding Water Strike water -> release action. */
-    private final Map<UUID,Runnable> heldWater=new HashMap<>();
+    private final Map<UUID,Runnable> heldWater=new java.util.concurrent.ConcurrentHashMap<>();
     @EventHandler(priority=EventPriority.MONITOR) public void releaseWater(PlayerToggleSneakEvent e){if(!e.isSneaking()){Runnable release=heldWater.remove(e.getPlayer().getUniqueId());if(release!=null)release.run();}}
     /** The Drowning effect: the target loses air and takes the configured damage every second for the duration. */
     private void drown(Player p,LivingEntity enemy){String id="water_book";UUID targetId=enemy.getUniqueId();
-        effects.add(new OwnedEffect(p,duration(id,2,5)){boolean step(Player caster){if(!(Bukkit.getEntity(targetId) instanceof LivingEntity target) || !enemy(caster,target))return false;
+        addEffect(new OwnedEffect(p,duration(id,2,5)){boolean step(Player caster){if(!(Bukkit.getEntity(targetId) instanceof LivingEntity target) || !enemy(caster,target))return false;
             if(age%5==0)particles(target.getEyeLocation(),Particle.BUBBLE_POP,6,.3);target.setRemainingAir(Math.max(-20,target.getRemainingAir()-15));
             if((age-1)%20==0)damage(caster,target,value(id,2,"damage",2));return true;}});
     }
@@ -310,7 +322,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         }
         // Suffocation: a ring of gusts around the caster; only enemies inside it lose air and take damage.
         double radius=bounded(value(id,1,"radius",2),.5,6);int life=duration(id,1,5);double amount=value(id,1,"damage",2);Map<UUID,Integer> hits=new HashMap<>();
-        effects.add(new OwnedEffect(p,life){boolean step(Player caster){Location center=caster.getLocation();if(!protection.canAffect(caster,center))return false;
+        addEffect(new OwnedEffect(p,life){boolean step(Player caster){Location center=caster.getLocation();if(!protection.canAffect(caster,center))return false;
             if(age%4==1){ring(center,radius,Particle.SMALL_GUST,.15);ring(center,radius,Particle.CLOUD,1.1);}
             if(age%5==1)for(LivingEntity target:inside(caster,center,radius)){
                 target.setRemainingAir(Math.max(-20,target.getRemainingAir()-30));
@@ -336,7 +348,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
         if(p.isInsideVehicle() || p.isGliding())return false;Vector direction=p.getLocation().getDirection().normalize();double distance=bounded(value(id,0,"distance",5),1,5);
         // Validate a swept path before activation; an adjacent wall is a failed cast, not a charged cooldown.
         Location start=p.getLocation(),first=start.clone().add(direction.clone().multiply(.25));if(!dashSafe(p,first))return false;
-        Set<UUID> hit=new HashSet<>();effects.add(new OwnedEffect(p,8){double travelled;
+        Set<UUID> hit=new HashSet<>();addEffect(new OwnedEffect(p,8){double travelled;
             boolean step(Player caster){String held=activeItem(caster);if(!held.equals(id))return false;Location from=caster.getLocation(),to=from.clone();double step=Math.min(1,distance-travelled);if(step<=0)return false;
                 for(double offset=.25;offset<=step+.001;offset+=.25){Location candidate=from.clone().add(direction.clone().multiply(Math.min(offset,step)));if(!dashSafe(caster,candidate))break;to=candidate;}
                 if(to.distanceSquared(from)<.001)return false;if(!caster.teleport(to,PlayerTeleportEvent.TeleportCause.PLUGIN))return false;
@@ -364,7 +376,7 @@ public final class MagicSystem implements Listener,AutoCloseable {
             d.setTransformationMatrix(new org.joml.Matrix4f().rotateZ((float)(Math.PI/4)).scale(1.5f));
             d.getPersistentDataContainer().set(ExpansionItems.key("magic_visual"),PersistentDataType.STRING,p.getUniqueId().toString());});
         ItemDisplay display=model;
-        effects.add(new OwnedEffect(p,life){double angle;
+        addEffect(new OwnedEffect(p,life){double angle;
             boolean step(Player caster){if(!activeItem(caster).equals("legendary_scythe"))return false;Location center=caster.getLocation();if(!protection.canAffect(caster,center))return false;
                 double from=angle;angle+=WINDMILL_ORBIT;
                 Location blade=center.clone().add(Math.cos(angle)*radius,1,Math.sin(angle)*radius);
@@ -402,12 +414,19 @@ public final class MagicSystem implements Listener,AutoCloseable {
         p.sendActionBar(line.build());
     }
     private static String time(long millis){long seconds=(millis+999)/1000;return seconds>=60?(seconds/60)+"m "+(seconds%60)+"s":seconds+"s";}
-    private void pump(){ticks++;long now=System.currentTimeMillis();
-        for(Iterator<Effect> it=effects.iterator();it.hasNext();){Effect e=it.next();try{if(!e.tick()){e.close();it.remove();}}catch(RuntimeException failure){e.close();it.remove();plugin.getLogger().warning("Magic effect stopped safely: "+failure.getMessage());}}
-        for(Player p:Bukkit.getOnlinePlayers())flights.hold(p);
-        terrain.pump(now,false);if(ticks%10==0){summons.tick(now);for(Player p:Bukkit.getOnlinePlayers())flights.tick(p,now);}
-        if(ticks%10==0)for(Player p:Bukkit.getOnlinePlayers())hud(p,now);
-        if(ticks%20==0){for(Player p:Bukkit.getOnlinePlayers())passives.tick(p);dispatched.clear();feedback.entrySet().removeIf(e->e.getValue()<now-60_000);}
+    /** World-independent upkeep: temporary-block restores (each handed to its own region), summons, bookkeeping. */
+    private void globalPump(){ticks++;long now=System.currentTimeMillis();
+        terrain.pump(now,false);if(ticks%10==0)summons.tick(now);
+        if(ticks%20==0){dispatched.clear();feedback.entrySet().removeIf(e->e.getValue()<now-60_000);}
+    }
+    /** One player's tick, on that player's thread. */
+    private void playerPump(Player p){long now=System.currentTimeMillis();int tick=dev.duckmc.blastforge.Tasks.tick();
+        var list=effects.get(p.getUniqueId());
+        if(list!=null)for(Effect e:list){try{if(!e.tick()){e.close();list.remove(e);}}catch(RuntimeException failure){e.close();list.remove(e);plugin.getLogger().warning("Magic effect stopped safely: "+failure.getMessage());}}
+        if(list!=null&&list.isEmpty())effects.remove(p.getUniqueId(),list);
+        flights.hold(p);
+        if(tick%10==0){flights.tick(p,now);hud(p,now);}
+        if(tick%20==0)passives.tick(p);
     }
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void passiveDamage(EntityDamageEvent e){if(!(e.getEntity() instanceof Player p))return;int books=passives.scan(p);boolean cancel=switch(e.getCause()){
         case FIRE,FIRE_TICK,LAVA,HOT_FLOOR->(books&MagicPassives.FIRE)!=0;case DROWNING->(books&MagicPassives.WATER)!=0;case FALL->(books&MagicPassives.WIND)!=0 || flights.safeFall(p);default->false;};if(cancel)e.setCancelled(true);
@@ -421,14 +440,14 @@ public final class MagicSystem implements Listener,AutoCloseable {
     @EventHandler public void inventory(PlayerInventorySlotChangeEvent e){passives.dirty(e.getPlayer());}
     @EventHandler public void held(PlayerItemHeldEvent e){passives.dirty(e.getPlayer());}
     @EventHandler public void swap(PlayerSwapHandItemsEvent e){passives.dirty(e.getPlayer());}
-    @EventHandler public void join(PlayerJoinEvent e){flights.reconcile(e.getPlayer());passives.scan(e.getPlayer());}
-    private void cancel(Player p){for(Iterator<Effect> it=effects.iterator();it.hasNext();){Effect effect=it.next();if(effect.owner().equals(p.getUniqueId())){effect.close();it.remove();}}summons.removeOwner(p.getUniqueId());flights.restore(p);passives.remove(p);dispatched.remove(p.getUniqueId());feedback.remove(p.getUniqueId());}
+    @EventHandler public void join(PlayerJoinEvent e){flights.reconcile(e.getPlayer());passives.scan(e.getPlayer());startPlayer(e.getPlayer());}
+    private void cancel(Player p){var list=effects.remove(p.getUniqueId());if(list!=null)for(Effect effect:list)try{effect.close();}catch(RuntimeException ignored){}summons.removeOwner(p.getUniqueId());flights.restore(p);passives.remove(p);dispatched.remove(p.getUniqueId());feedback.remove(p.getUniqueId());}
     @EventHandler public void quit(PlayerQuitEvent e){cancel(e.getPlayer());}
     @EventHandler public void death(PlayerDeathEvent e){cancel(e.getEntity());}
     @EventHandler public void world(PlayerChangedWorldEvent e){cancel(e.getPlayer());}
-    @EventHandler public void mode(PlayerGameModeChangeEvent e){if(!e.isCancelled())plugin.getServer().getScheduler().runTask(plugin,()->flights.restore(e.getPlayer()));}
+    @EventHandler public void mode(PlayerGameModeChangeEvent e){if(!e.isCancelled())dev.duckmc.blastforge.Tasks.entity(plugin,e.getPlayer(),()->flights.restore(e.getPlayer()));}
     @EventHandler public void unload(WorldUnloadEvent e){for(Player p:e.getWorld().getPlayers())cancel(p);terrain.pump(Long.MAX_VALUE,true);}
     /** Region/edit plugins can call this before direct block changes that do not emit Bukkit events. */
     public void invalidateTemporaryBlock(Block block){terrain.invalidate(block);}
-    @Override public void close(){if(closed)return;closed=true;if(task!=null){task.cancel();task=null;}for(Effect effect:effects)effect.close();effects.clear();summons.close();flights.close();for(Player p:Bukkit.getOnlinePlayers())passives.remove(p);terrain.close();HandlerList.unregisterAll(this);}
+    @Override public void close(){if(closed)return;closed=true;if(task!=null){task.cancel();task=null;}for(var handle:playerTasks.values())handle.cancel();playerTasks.clear();for(var list:effects.values())for(Effect effect:list)try{effect.close();}catch(RuntimeException ignored){}effects.clear();summons.close();flights.close();for(Player p:Bukkit.getOnlinePlayers())passives.remove(p);terrain.close();HandlerList.unregisterAll(this);}
 }

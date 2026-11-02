@@ -24,9 +24,11 @@ final class MagicTerrain implements Listener,AutoCloseable {
         Material.SNOW_BLOCK,Material.TERRACOTTA,Material.DRIPSTONE_BLOCK,Material.DIRT_PATH,Material.FARMLAND);
     private final JavaPlugin plugin;private final Function<String,FileConfiguration> configs;private final PersistentStore store;
     private final ExpansionProtection protection;private final MagicTerrainJournal journal;
-    private int workTick=Integer.MIN_VALUE,spent;
-    private final Map<MagicTerrainJournal.Position,Integer> pendingPlacements=new HashMap<>();
-    private final Set<Runnable> placementDecisions=new HashSet<>();
+    private volatile int workTick=Integer.MIN_VALUE;private final java.util.concurrent.atomic.AtomicInteger spentWork=new java.util.concurrent.atomic.AtomicInteger();
+    private final Map<MagicTerrainJournal.Position,Integer> pendingPlacements=new java.util.concurrent.ConcurrentHashMap<>();
+    /** Restores already handed to a region thread and not finished yet. */
+    private final Set<MagicTerrainJournal.Position> inFlight=java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final Set<Runnable> placementDecisions=java.util.concurrent.ConcurrentHashMap.newKeySet();
     MagicTerrain(JavaPlugin plugin,Function<String,FileConfiguration> configs,PersistentStore store,ExpansionProtection protection){
         this.plugin=plugin;this.configs=configs;this.store=store;this.protection=protection;this.journal=new MagicTerrainJournal(store);
     }
@@ -54,7 +56,7 @@ final class MagicTerrain implements Listener,AutoCloseable {
         }
         return true;
     }
-    private int remainingWork(){int tick=Bukkit.getCurrentTick();if(tick!=workTick){workTick=tick;spent=0;}return Math.max(0,Math.max(1,Math.min(256,configs.apply("magic").getInt("temporary-blocks.work-per-tick",128)))-spent);}
+    private int remainingWork(){int tick=dev.duckmc.blastforge.Tasks.tick();if(tick!=workTick){workTick=tick;spentWork.set(0);}int spent=spentWork.get();return Math.max(0,Math.max(1,Math.min(256,configs.apply("magic").getInt("temporary-blocks.work-per-tick",128)))-spent);}
     boolean change(Player player,List<Block> requested,Material temporary,double seconds){return change(player,requested,temporary,seconds,false);}
     /** Air or soft blocks (grass, snow layers, flowers) a temporary block may stand in; never fluids. */
     static boolean soft(Block b){return b.getType().isAir() || b.isReplaceable() && !b.isLiquid() && b.getType()!=Material.FIRE && b.getType()!=Material.SOUL_FIRE;}
@@ -87,7 +89,7 @@ final class MagicTerrain implements Listener,AutoCloseable {
             journal.batch(()->{for(Block b:accepted)if(journal.reserve(pos(b),operation,player.getUniqueId(),originals.get(b),expected,expiry))reserved.add(b);});
             for(Block b:reserved){
                 b.getChunk().getPersistentDataContainer().set(token(b),PersistentDataType.STRING,operation.toString());
-                b.setBlockData(temporary.createBlockData(),false);changed.add(b);spent++;
+                b.setBlockData(temporary.createBlockData(),false);changed.add(b);spentWork.incrementAndGet();
             }
             journal.batch(()->{for(Block b:changed)journal.applied(pos(b),operation);});
         }catch(RuntimeException failure){
@@ -101,31 +103,49 @@ final class MagicTerrain implements Listener,AutoCloseable {
     }
     /** Public integration callers must invalidate before directly changing an owned coordinate. */
     void invalidate(Block block){if(journal.records().containsKey(pos(block))){journal.invalidate(pos(block));removeToken(block);}}
+    /**
+     * Restores temporary blocks whose time is up. The decision of what is due happens here; each restore runs on the
+     * thread that owns its block (on Folia every region has its own thread; on Paper this is the main thread).
+     * {@code force} (shutdown, world unload) restores everything at once where that is allowed, i.e. not on Folia: there
+     * the durable journal simply restores the blocks after the next start.
+     */
     void pump(long now,boolean force){
-        int budget=force?Math.max(1,Math.min(256,configs.apply("magic").getInt("temporary-blocks.work-per-tick",128))):remainingWork(),writes=0;List<Runnable> acknowledgments=new ArrayList<>();
+        if(force && dev.duckmc.blastforge.Tasks.folia())return;
+        int budget=force?Math.max(1,Math.min(256,configs.apply("magic").getInt("temporary-blocks.work-per-tick",128))):remainingWork(),handed=0;
         for(var item:new ArrayList<>(journal.records().entrySet())){
-            if(writes>=budget)break;
-            var position=item.getKey();var entry=item.getValue();World world=Bukkit.getWorld(position.world());
-            if(pendingPlacements.containsKey(position))continue;
-            if(world==null || !world.isChunkLoaded(position.x()>>4,position.z()>>4))continue;
-            Block block=world.getBlockAt(position.x(),position.y(),position.z());
-            if(entry.phase().equals("INVALIDATED")){removeToken(block);acknowledgments.add(()->journal.forget(position));writes++;continue;}
-            if(!entry.phase().equals("APPLIED")){
-                // DB/region writes cannot be committed atomically; uncertain crash windows are quarantined.
-                if(block.getBlockData().getAsString().equals(entry.original())){removeToken(block);acknowledgments.add(()->journal.forget(position));}
-                else acknowledgments.add(()->journal.quarantine(position));
-                writes++;continue;
-            }
-            if(!entry.operation().toString().equals(tokenValue(block)) || !journal.mayRestore(position,entry.operation(),block.getBlockData().getAsString())){
-                acknowledgments.add(()->journal.quarantine(position));removeToken(block);writes++;continue;
-            }
-            if(!force && entry.expiry()>now)continue;
-            if(!Bukkit.createBlockData(entry.original()).getMaterial().isAir() && !world.getNearbyEntities(new BoundingBox(position.x(),position.y(),position.z(),position.x()+1,position.y()+1,position.z()+1),e->e instanceof LivingEntity).isEmpty())continue;
-            block.setBlockData(Bukkit.createBlockData(entry.original()),false);removeToken(block);acknowledgments.add(()->journal.forget(position));writes++;
+            if(handed>=budget)break;
+            var position=item.getKey();var entry=item.getValue();
+            if(pendingPlacements.containsKey(position)||inFlight.contains(position))continue;
+            boolean due=force||!entry.phase().equals("APPLIED")||entry.expiry()<=now;
+            if(!due)continue;
+            World world=Bukkit.getWorld(position.world());if(world==null)continue;
+            Location location=new Location(world,position.x(),position.y(),position.z());
+            if(force){restore(position,now,true);handed++;continue;}
+            inFlight.add(position);handed++;
+            dev.duckmc.blastforge.Tasks.nowAt(plugin,location,()->{try{restore(position,now,false);}finally{inFlight.remove(position);}});
         }
-        // A failed acknowledgment leaves recoverable records; restored blocks are never changed again blindly.
-        if(!force)spent+=writes;
-        if(!acknowledgments.isEmpty())journal.batch(()->acknowledgments.forEach(Runnable::run));
+        if(!force)spentWork.addAndGet(handed);
+    }
+    /** One block, on the thread that owns it. A failed acknowledgment leaves a recoverable record; blocks are never changed blindly. */
+    private void restore(MagicTerrainJournal.Position position,long now,boolean force){
+        var entry=journal.records().get(position);World world=Bukkit.getWorld(position.world());
+        if(entry==null || world==null || !world.isChunkLoaded(position.x()>>4,position.z()>>4) || pendingPlacements.containsKey(position))return;
+        Block block=world.getBlockAt(position.x(),position.y(),position.z());Runnable acknowledge;
+        if(entry.phase().equals("INVALIDATED")){removeToken(block);acknowledge=()->journal.forget(position);}
+        else if(!entry.phase().equals("APPLIED")){
+            // DB/region writes cannot be committed atomically; uncertain crash windows are quarantined.
+            if(block.getBlockData().getAsString().equals(entry.original())){removeToken(block);acknowledge=()->journal.forget(position);}
+            else acknowledge=()->journal.quarantine(position);
+        }
+        else if(!entry.operation().toString().equals(tokenValue(block)) || !journal.mayRestore(position,entry.operation(),block.getBlockData().getAsString())){
+            acknowledge=()->journal.quarantine(position);removeToken(block);
+        }
+        else{
+            if(!force && entry.expiry()>now)return;
+            if(!Bukkit.createBlockData(entry.original()).getMaterial().isAir() && !world.getNearbyEntities(new BoundingBox(position.x(),position.y(),position.z(),position.x()+1,position.y()+1,position.z()+1),e->e instanceof LivingEntity).isEmpty())return;
+            block.setBlockData(Bukkit.createBlockData(entry.original()),false);removeToken(block);acknowledge=()->journal.forget(position);
+        }
+        journal.batch(acknowledge);
     }
     private boolean touching(Block b){
         if(owned(b))return true;
@@ -152,7 +172,7 @@ final class MagicTerrain implements Listener,AutoCloseable {
                 }finally{for(var position:operations.keySet())pendingPlacements.computeIfPresent(position,(key,count)->count==1?null:count-1);}
             }
         };
-        placementDecisions.add(decision);plugin.getServer().getScheduler().runTask(plugin,decision);
+        placementDecisions.add(decision);dev.duckmc.blastforge.Tasks.at(plugin,e.getBlockPlaced(),decision);
     }
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void broken(BlockBreakEvent e){if(owned(e.getBlock())){e.setCancelled(true);e.setDropItems(false);e.setExpToDrop(0);}}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void piston(BlockPistonExtendEvent e){if(touching(e.getBlock()) || e.getBlocks().stream().anyMatch(b->touching(b)||touching(b.getRelative(e.getDirection()))))e.setCancelled(true);}

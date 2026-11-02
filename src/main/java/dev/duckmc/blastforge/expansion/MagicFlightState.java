@@ -9,7 +9,7 @@ final class MagicFlightState {
         static Lease decode(String value){var p=value.split("\\|");return new Lease(Boolean.parseBoolean(p[0]),Boolean.parseBoolean(p[1]),p[2],Long.parseLong(p[3]));}
     }
     private final PersistentStore store;
-    private final Map<UUID,Lease> leases=new HashMap<>();
+    private final Map<UUID,Lease> leases=new java.util.concurrent.ConcurrentHashMap<>();
     MagicFlightState(PersistentStore store){this.store=store;for(var e:store.entries("magic.flight").entrySet())try{leases.put(UUID.fromString(e.getKey()),Lease.decode(e.getValue()));}catch(RuntimeException malformed){store.put("magic.flight-quarantine",e.getKey(),e.getValue());store.remove("magic.flight",e.getKey());}}
     Lease get(UUID player){return leases.get(player);}
     Set<UUID> players(){return Set.copyOf(leases.keySet());}

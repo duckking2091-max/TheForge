@@ -19,7 +19,9 @@ final class MagicSummons implements Listener,AutoCloseable {
     private static final NamespacedKey EXPIRY=ExpansionItems.key("magic_summon_expires"),KIND=ExpansionItems.key("magic_summon_kind");
     private record Record(UUID owner,long expiry,boolean darkness){}
     private final JavaPlugin plugin;private final PersistentStore store;private final ExpansionProtection protection;private final MagicPassives passives;private final BooleanSupplier pvp;
-    private final Map<UUID,Record> records=new HashMap<>();
+    private final Map<UUID,Record> records=new java.util.concurrent.ConcurrentHashMap<>();
+    /** Summons spawned this session, so the global loop can reach them on Folia (see Tasks.find). */
+    private final Map<UUID,Entity> live=new java.util.concurrent.ConcurrentHashMap<>();
     MagicSummons(JavaPlugin plugin,PersistentStore store,ExpansionProtection protection,MagicPassives passives,BooleanSupplier pvp){this.plugin=plugin;this.store=store;this.protection=protection;this.passives=passives;this.pvp=pvp;
         for(var e:store.entries("magic.summons").entrySet())try{var p=e.getValue().split("\\|");records.put(UUID.fromString(e.getKey()),new Record(UUID.fromString(p[0]),Long.parseLong(p[1]),Boolean.parseBoolean(p[2])));}catch(RuntimeException bad){store.remove("magic.summons",e.getKey());}
     }
@@ -46,7 +48,7 @@ final class MagicSummons implements Listener,AutoCloseable {
                 Mob mob=darkness?loc.getWorld().spawn(loc,WitherSkeleton.class,CreatureSpawnEvent.SpawnReason.CUSTOM,false,m->configure(m,player,true,expiry)):
                     loc.getWorld().spawn(loc,Drowned.class,CreatureSpawnEvent.SpawnReason.CUSTOM,false,m->configure(m,player,false,expiry));
                 if(!mob.isValid() || mob.isDead())throw new IllegalStateException("Summon denied by spawn rules");spawned.add(mob);
-                store.put("magic.summons",mob.getUniqueId().toString(),player.getUniqueId()+"|"+expiry+"|"+darkness);records.put(mob.getUniqueId(),new Record(player.getUniqueId(),expiry,darkness));
+                store.put("magic.summons",mob.getUniqueId().toString(),player.getUniqueId()+"|"+expiry+"|"+darkness);live.put(mob.getUniqueId(),mob);records.put(mob.getUniqueId(),new Record(player.getUniqueId(),expiry,darkness));
             }
             return true;
         }catch(RuntimeException denied){for(Mob mob:spawned)remove(mob);plugin.getLogger().info("Summon for "+player.getName()+" was blocked: "+denied.getMessage()+" (another plugin or a region cancelled the spawn)");
@@ -70,20 +72,28 @@ final class MagicSummons implements Listener,AutoCloseable {
         if(target instanceof Player && (!pvp.getAsBoolean() || !owner.getWorld().getPVP()))return false;
         return !(target instanceof Player p && (passives.books(p)&MagicPassives.DARKNESS)!=0) && protection.canDamage(owner,target);
     }
+    /** Called from the global tick; each summon is then checked on its own thread (its region on Folia). */
     void tick(long now){for(var item:new ArrayList<>(records.entrySet())){
-        Entity entity=Bukkit.getEntity(item.getKey());Record r=item.getValue();Player owner=Bukkit.getPlayer(r.owner);
+        Entity entity=dev.duckmc.blastforge.Tasks.find(live,item.getKey());Record r=item.getValue();
         if(entity==null){if(r.expiry<=now){store.remove("magic.summons",item.getKey().toString());records.remove(item.getKey());}continue;}
-        if(!(entity instanceof Mob mob) || r.expiry<=now || owner==null || !owner.isOnline() || owner.isDead() || !owner.getWorld().equals(entity.getWorld())){remove(entity);continue;}
+        dev.duckmc.blastforge.Tasks.now(plugin,entity,()->check(entity,r,now));
+    }}
+    private void check(Entity entity,Record r,long now){
+        Player owner=Bukkit.getPlayer(r.owner);
+        if(!(entity instanceof Mob mob) || r.expiry<=now || owner==null || !owner.isOnline() || owner.isDead() || !owner.getWorld().equals(entity.getWorld())){remove(entity);return;}
+
         if(mob.getTarget()==null || !mob.getTarget().isValid() || !allowed(r,mob.getTarget())){
             // nearest valid enemy; without one they stop attacking and walk back to their owner
             LivingEntity target=entity.getWorld().getNearbyLivingEntities(entity.getLocation(),12,t->!t.equals(entity) && t.isValid() && !t.isDead() && allowed(r,t)).stream().min(Comparator.comparingDouble(t->t.getLocation().distanceSquared(entity.getLocation()))).orElse(null);
             mob.setTarget(target);
             if(target==null && mob.getLocation().distanceSquared(owner.getLocation())>36)mob.getPathfinder().moveTo(owner.getLocation(),1.1);
         }
-    }}
-    void remove(Entity e){store.remove("magic.summons",e.getUniqueId().toString());records.remove(e.getUniqueId());e.remove();}
+    
+    }
+    void remove(Entity e){live.remove(e.getUniqueId());store.remove("magic.summons",e.getUniqueId().toString());records.remove(e.getUniqueId());e.remove();}
     void removeOwner(UUID owner){for(var e:new ArrayList<>(records.entrySet()))if(e.getValue().owner.equals(owner)){Entity mob=Bukkit.getEntity(e.getKey());if(mob!=null)remove(mob);else{store.remove("magic.summons",e.getKey().toString());records.remove(e.getKey());}}}
-    void cleanupLoaded(){for(World world:Bukkit.getWorlds())for(Entity e:world.getEntities())if(marked(e))remove(e);}
+    /** Removes leftover summons in loaded chunks. Not possible on Folia (no thread may see every region): there they are removed as their chunks load. */
+    void cleanupLoaded(){if(dev.duckmc.blastforge.Tasks.folia())return;for(World world:Bukkit.getWorlds())for(Entity e:world.getEntities())if(marked(e))remove(e);}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void target(EntityTargetLivingEntityEvent e){if(!marked(e.getEntity()))return;Record r=record(e.getEntity());if(e.getTarget()!=null && (r==null || !allowed(r,e.getTarget())))e.setCancelled(true);}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void damage(EntityDamageByEntityEvent e){Entity source=e.getDamager();if(source instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter)source=shooter;if(!marked(source))return;Record r=record(source);if(!(e.getEntity() instanceof LivingEntity target) || r==null || !allowed(r,target))e.setCancelled(true);}
     @EventHandler(priority=EventPriority.HIGHEST) public void death(EntityDeathEvent e){if(marked(e.getEntity())){e.getDrops().clear();e.setDroppedExp(0);store.remove("magic.summons",e.getEntity().getUniqueId().toString());records.remove(e.getEntity().getUniqueId());}}

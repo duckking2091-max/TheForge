@@ -21,7 +21,7 @@ import dev.duckmc.blastforge.expansion.ItemCodec;
 final class ExtractionMenu implements Listener {
     private final JavaPlugin plugin;
     private final Predicate<Block> station;
-    private final Map<UUID,Session> sessions=new HashMap<>();
+    private final Map<UUID,Session> sessions=new java.util.concurrent.ConcurrentHashMap<>();
     private Mailbox mailbox;
     private PersistentStore store;
     private java.util.function.IntSupplier experienceCost=()->0;
@@ -84,7 +84,7 @@ final class ExtractionMenu implements Listener {
         releaseSource.run();
         if(store!=null)store.put("extraction_session",key,"S\n"+s.id+"\n"+encoded);
         sessions.put(player.getUniqueId(),s);
-        plugin.getServer().getScheduler().runTask(plugin,()->{
+        dev.duckmc.blastforge.Tasks.entity(plugin,player,()->{
             if(s.finished||sessions.get(player.getUniqueId())!=s)return;
             if(!player.isOnline()||!player.getOpenInventory().getTopInventory().equals(source)){cancel(s);return;}
             player.closeInventory();draw(s);
@@ -141,8 +141,8 @@ final class ExtractionMenu implements Listener {
             case 46 -> s.selected.clear();
             case 48 -> s.page=Math.max(0,s.page-1);
             case 50 -> s.page=Math.min((s.options.size()-1)/PAGE_SIZE,s.page+1);
-            case 52 -> {plugin.getServer().getScheduler().runTask(plugin,()->{if(!s.finished)s.player.closeInventory();});return;}
-            case 53 -> {plugin.getServer().getScheduler().runTask(plugin,()->confirm(s));return;}
+            case 52 -> {dev.duckmc.blastforge.Tasks.entity(plugin,s.player,()->{if(!s.finished)s.player.closeInventory();});return;}
+            case 53 -> {dev.duckmc.blastforge.Tasks.entity(plugin,s.player,()->confirm(s));return;}
             default -> {return;}
         }
         draw(s);

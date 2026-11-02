@@ -18,7 +18,7 @@ final class VillagerRules {
         }
     }
     static final class Claims {
-        private final Map<String,UUID> sites=new HashMap<>();
+        private final Map<String,UUID> sites=new java.util.concurrent.ConcurrentHashMap<>();
         boolean claim(String site,UUID owner){if(sites.containsKey(site))return owner.equals(sites.get(site));if(sites.containsValue(owner))return false;sites.put(site,owner);return true;}
         boolean release(String site,UUID owner){return sites.remove(site,owner);}
         UUID owner(String site){return sites.get(site);}

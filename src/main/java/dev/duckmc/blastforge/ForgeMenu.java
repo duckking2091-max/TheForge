@@ -26,7 +26,7 @@ final class ForgeMenu implements Listener {
         AnvilView view(){return view;}
         Location location(){return location;}
     }
-    private final Map<UUID,Session> sessions=new HashMap<>();
+    private final Map<UUID,Session> sessions=new java.util.concurrent.ConcurrentHashMap<>();
     private final BlastForge plugin;
     private final ExtractionMenu extraction;
     private boolean normalOperationsOnly;
@@ -80,7 +80,7 @@ final class ForgeMenu implements Listener {
         // -1 AFTER this event, so restore the preview/cost after native processing.
         event.getView().setRepairCost(0);
         event.getView().setRepairItemCountCost(0);
-        plugin.getServer().getScheduler().runTask(plugin,() -> {
+        dev.duckmc.blastforge.Tasks.entity(plugin,event.getView().getPlayer(),() -> {
             if(!owns(event.getView()) || session.revision!=revision) return;
             var inventory=event.getView().getTopInventory();
             inventory.setItem(2,session.operation.result().clone());
@@ -111,7 +111,7 @@ final class ForgeMenu implements Listener {
             ItemStack original=top.getItem(0).clone(),books=top.getItem(1).clone();
             // Inventory screens must not be replaced inside a click callback.
             // Revalidate everything next tick before moving ownership to the selector.
-            plugin.getServer().getScheduler().runTask(plugin,()->{
+            dev.duckmc.blastforge.Tasks.entity(plugin,player,()->{
                 if(!owns(event.getView()) || !player.isOnline()
                     || session.location()!=null&&!plugin.stations().isStation(session.location().getBlock())
                     || !original.equals(top.getItem(0)) || !books.equals(top.getItem(1)))return;
@@ -127,7 +127,7 @@ final class ForgeMenu implements Listener {
         if(shift) player.getInventory().addItem(result);
         else player.setItemOnCursor(result);
         player.playSound(session.location()==null?player.getLocation():session.location(),Sound.BLOCK_ANVIL_USE,1,1);
-        plugin.getServer().getScheduler().runTask(plugin,player::updateInventory);
+        dev.duckmc.blastforge.Tasks.entity(plugin,player,player::updateInventory);
     }
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void drag(InventoryDragEvent event) {

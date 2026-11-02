@@ -18,7 +18,7 @@ import java.util.UUID;
 final class BlastMining implements Listener {
     private final BlastForge plugin;
     private final Enchantment blast;
-    private final Set<UUID> mining = new HashSet<>();
+    private final Set<UUID> mining = java.util.concurrent.ConcurrentHashMap.newKeySet();
     BlastMining(BlastForge plugin, Enchantment blast) { this.plugin=plugin; this.blast=blast; }
 
     @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
@@ -39,7 +39,7 @@ final class BlastMining implements Listener {
         var cells=MiningShape.offsets(Math.min(3,level),axis,sign);
         // Wait for the original break and its durability charge to finish. The event reference
         // also lets us observe cancellations made later in the same event dispatch.
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
+        dev.duckmc.blastforge.Tasks.at(plugin,origin, () -> {
             if(event.isCancelled() || !(origin.getType().isAir() || origin.isLiquid()) || !player.isOnline()
                 || player.getGameMode()!=GameMode.SURVIVAL || !player.getWorld().equals(origin.getWorld())) return;
             mining.add(player.getUniqueId());

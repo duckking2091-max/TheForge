@@ -22,7 +22,7 @@ final class ExpansionRuntime implements AutoCloseable {
     static final java.util.Set<String> DISPLAY_ONLY=java.util.Set.of("anvil_hammer","anvil_tools","magician_hat","magician_robes","miner_backpack","miner_helmet","tab_forging","tab_upgrading","tab_ritual","tab_rename","tab_close","guide_button");
     private PackVisuals pack;private StationVisuals visuals;private GuideBook guide;
     private VillagerSystem villagers;
-    private org.bukkit.scheduler.BukkitTask diagnostics;
+    private dev.duckmc.blastforge.Tasks.Handle diagnostics;
     private boolean closing;
     ExpansionRuntime(BlastForge plugin){this.plugin=plugin;}
     void start(ExtractionMenu extraction,ForgeMenu nativeAnvil){
@@ -41,12 +41,12 @@ final class ExpansionRuntime implements AutoCloseable {
         startVisuals();
         startVillagers();
         guide=new GuideBook(plugin,settings::get);guide.start();guideReader=new GuideReader(plugin,guide,items);guideReader.start();guide.reader(guideReader,pack);
-        diagnostics=plugin.getServer().getScheduler().runTaskTimer(plugin,()->{
+        diagnostics=dev.duckmc.blastforge.Tasks.globalTimer(plugin,100,100,()->{
             var watchers=plugin.getServer().getOnlinePlayers().stream().filter(p->"true".equals(store.get("debug",p.getUniqueId().toString()))).toList();
             boolean console="true".equals(store.get("debug","console"));if(watchers.isEmpty()&&!console)return;
             String text="The Forge: scythes "+store.occupiedScythes()+"/"+scythes.maximum()+", pending deliveries "+store.entries("mailbox").size()+", recovery records "+store.entries("quarantine").size();
             watchers.forEach(p->p.sendActionBar(Component.text(text)));if(console)plugin.getLogger().info(text);
-        },100,100);
+        });
     }
     boolean isOre(org.bukkit.block.Block block){return materials!=null&&materials.isOre(block);}
     private void startVisuals(){pack=new PackVisuals(plugin,items,settings::get);pack.start();visuals=new StationVisuals(plugin,items,settings::get);visuals.pack(pack);visuals.start();workshop.pack(pack);workshop.strikeHandler(visuals::strike);workshop.heatHandler(visuals::heat);plugin.stations().visuals(visuals::placed,visuals::removed);if(guide!=null){guideReader=new GuideReader(plugin,guide,items);guideReader.start();guide.reader(guideReader,pack);}}

@@ -13,7 +13,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 import java.util.function.Function;
 
@@ -30,7 +29,9 @@ final class MerchantAppearance implements Listener,AutoCloseable {
     private static final NamespacedKey KIND=new NamespacedKey("blastforge","villager_kind");
     private static final Set<String> OUTFIT_IDS=Set.of("magician_hat","magician_robes","miner_helmet","miner_backpack");
     private final JavaPlugin plugin;private final ExpansionItems items;private final Function<String,FileConfiguration> configs;private final PackVisuals pack;
-    private final Map<UUID,String> tracked=new HashMap<>();private BukkitTask task;
+    private final Map<UUID,String> tracked=new java.util.concurrent.ConcurrentHashMap<>();
+    /** Each merchant's own outfit check, on its own thread (it follows the villager; ends when the villager is removed). */
+    private final Map<UUID,dev.duckmc.blastforge.Tasks.Handle> watchers=new java.util.concurrent.ConcurrentHashMap<>();
     MerchantAppearance(JavaPlugin plugin,ExpansionItems items,Function<String,FileConfiguration> configs,PackVisuals pack){
         this.plugin=plugin;this.items=items;this.configs=configs;this.pack=pack;if(pack!=null)pack.onStatusChange(this::visibility);
         plugin.getServer().getPluginManager().registerEvents(this,plugin);
@@ -39,8 +40,13 @@ final class MerchantAppearance implements Listener,AutoCloseable {
     static String outfit(String kind){return kind.equals("magician")?"magician_robes":"miner_backpack";}
     static Villager.Profession job(String kind){return kind.equals("magician")?Villager.Profession.LIBRARIAN:Villager.Profession.TOOLSMITH;}
     void track(AbstractVillager merchant,String kind){
-        tracked.put(merchant.getUniqueId(),kind);sync(merchant,kind);
-        if(task==null)task=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tick,1,1);
+        UUID id=merchant.getUniqueId();tracked.put(id,kind);sync(merchant,kind);
+        if(watchers.containsKey(id))return;
+        watchers.put(id,dev.duckmc.blastforge.Tasks.entityTimer(plugin,merchant,1,1,handle->{
+            String current=tracked.get(id);
+            if(current==null||!merchant.isValid()){handle.cancel();watchers.remove(id);tracked.remove(id);return;}
+            sync(merchant,current);
+        },()->{watchers.remove(id);tracked.remove(id);}));
     }
     /** Dress or undress to match the villager's current job. */
     private void sync(AbstractVillager merchant,String kind){
@@ -58,13 +64,13 @@ final class MerchantAppearance implements Listener,AutoCloseable {
         if(OUTFIT_IDS.contains(items.id(eq.getHelmet())))eq.setHelmet(null);
         if(OUTFIT_IDS.contains(items.id(eq.getItemInMainHand())))eq.setItemInMainHand(null);
     }
+    /** Re-checks every tracked merchant: right away where this thread owns it, otherwise on its own thread. */
     void tick(){
         for(var entry:new ArrayList<>(tracked.entrySet())){
             Entity entity=plugin.getServer().getEntity(entry.getKey());
             if(!(entity instanceof AbstractVillager merchant)||!merchant.isValid()){tracked.remove(entry.getKey());continue;}
-            sync(merchant,entry.getValue());
+            if(dev.duckmc.blastforge.Tasks.owns(merchant))sync(merchant,entry.getValue());else dev.duckmc.blastforge.Tasks.entity(plugin,merchant,()->sync(merchant,entry.getValue()));
         }
-        if(tracked.isEmpty()&&task!=null){task.cancel();task=null;}
     }
     /** Villagers that stopped being merchants while unloaded (or in an older version) lose any leftover outfit pieces. */
     @EventHandler public void loaded(EntitiesLoadEvent event){
@@ -81,9 +87,9 @@ final class MerchantAppearance implements Listener,AutoCloseable {
         if(OUTFIT_IDS.contains(items.id(merchant.getEquipment().getHelmet())))viewer.sendEquipmentChange(merchant,EquipmentSlot.HEAD,new ItemStack(Material.AIR));
         if(OUTFIT_IDS.contains(items.id(merchant.getEquipment().getItemInMainHand())))viewer.sendEquipmentChange(merchant,EquipmentSlot.HAND,new ItemStack(Material.AIR));
     }
-    @EventHandler public void tracked(PlayerTrackEntityEvent event){if(event.getEntity() instanceof AbstractVillager merchant&&tracked.containsKey(merchant.getUniqueId())){Player viewer=event.getPlayer();plugin.getServer().getScheduler().runTask(plugin,()->{if(viewer.isOnline()&&merchant.isValid())hide(viewer,merchant);});}}
+    @EventHandler public void tracked(PlayerTrackEntityEvent event){if(event.getEntity() instanceof AbstractVillager merchant&&tracked.containsKey(merchant.getUniqueId())){Player viewer=event.getPlayer();dev.duckmc.blastforge.Tasks.entity(plugin,viewer,()->{if(viewer.isOnline()&&merchant.isValid())hide(viewer,merchant);});}}
     /** The villager stops being a Miner/Magician: undress it now. */
     void strip(AbstractVillager merchant){tracked.remove(merchant.getUniqueId());if(merchant.getEquipment()!=null)undress(merchant.getEquipment());}
     void remove(UUID id){tracked.remove(id);}
-    @Override public void close(){if(task!=null){task.cancel();task=null;}tracked.clear();HandlerList.unregisterAll(this);}
+    @Override public void close(){for(var handle:watchers.values())handle.cancel();watchers.clear();tracked.clear();HandlerList.unregisterAll(this);}
 }

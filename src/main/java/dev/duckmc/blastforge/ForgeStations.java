@@ -22,8 +22,8 @@ final class ForgeStations implements Listener {
     private final ForgeMenu menu;
     private BiConsumer<Player,Location> opener;
     private Consumer<Block> placed=b->{},removed=b->{};
-    private final Map<Location,Object> generations=new HashMap<>();
-    private final Map<Location,BlockBreakEvent> pendingBreaks=new HashMap<>();
+    private final Map<Location,Object> generations=new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<Location,BlockBreakEvent> pendingBreaks=new java.util.concurrent.ConcurrentHashMap<>();
     ForgeStations(JavaPlugin plugin,ForgeItems items,ForgeMenu menu) { this.plugin=plugin; this.items=items; this.menu=menu; this.opener=menu==null?null:menu::open; }
     void opener(BiConsumer<Player,Location> opener){this.opener=opener;}
     void visuals(Consumer<Block> placed,Consumer<Block> removed){this.placed=placed;this.removed=removed;}
@@ -46,7 +46,7 @@ final class ForgeStations implements Listener {
         Object generation=new Object();
         generations.put(block.getLocation(),generation);
         mark(block,items.isAnvil(event.getItemInHand()));
-        plugin.getServer().getScheduler().runTask(plugin,() -> {
+        dev.duckmc.blastforge.Tasks.at(plugin,block,() -> {
             if(generations.remove(block.getLocation(),generation) && event.isCancelled()) mark(block,prior);
             if(!event.isCancelled()&&isStation(block))placed.accept(block);
         });
@@ -79,7 +79,7 @@ final class ForgeStations implements Listener {
         pendingBreaks.put(block.getLocation(),event);
         mark(block,false);
         removed.accept(block);
-        plugin.getServer().getScheduler().runTask(plugin,() -> {
+        dev.duckmc.blastforge.Tasks.at(plugin,block,() -> {
             pendingBreaks.remove(block.getLocation(),event);
             if(generations.remove(block.getLocation(),generation) && event.isCancelled()) mark(block,true);
         });

@@ -202,7 +202,7 @@ public final class GuideBook implements Listener,AutoCloseable {
         if(plugin.getServer().getRecipe(RECIPE)!=null)p.discoverRecipe(RECIPE);   // shows in the recipe book
         if(!cfg.getBoolean("guide.give-on-first-join",true)||p.getPersistentDataContainer().has(RECEIVED))return;
         p.getPersistentDataContainer().set(RECEIVED,PersistentDataType.BYTE,(byte)1);   // only ever once per player
-        if(!p.hasPlayedBefore()||cfg.getBoolean("guide.give-to-existing-players",false))plugin.getServer().getScheduler().runTaskLater(plugin,()->{if(p.isOnline())give(p);},20);
+        if(!p.hasPlayedBefore()||cfg.getBoolean("guide.give-to-existing-players",false))dev.duckmc.blastforge.Tasks.entityLater(plugin,p,20,()->{if(p.isOnline())give(p);});
     }
     private GuideReader reader;private PackVisuals pack;
     /** With the resource pack, the book opens as a two-page themed reader; without it, as a normal written book. */

@@ -11,7 +11,6 @@ import org.bukkit.event.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.*;
@@ -21,10 +20,10 @@ public final class PackVisuals implements Listener,AutoCloseable {
     public static final UUID PACK_ID=UUID.nameUUIDFromBytes("blastforge:1.21.11:expansion".getBytes(StandardCharsets.UTF_8));
     public enum Theme { FORGING,UPGRADING,RITUAL }
     private final JavaPlugin plugin;private final ExpansionItems items;private final Function<String,FileConfiguration> configs;
-    private final Set<UUID> loaded=new HashSet<>();private final List<Consumer<Player>> observers=new ArrayList<>();
-    private final Map<UUID,String> titles=new HashMap<>();private BukkitTask task;private int offset;
+    private final Set<UUID> loaded=java.util.concurrent.ConcurrentHashMap.newKeySet();private final List<Consumer<Player>> observers=new java.util.concurrent.CopyOnWriteArrayList<>();
+    private final Map<UUID,String> titles=new java.util.concurrent.ConcurrentHashMap<>();private dev.duckmc.blastforge.Tasks.Handle task;private int offset;
     public PackVisuals(JavaPlugin plugin,ExpansionItems items,Function<String,FileConfiguration> configs){this.plugin=plugin;this.items=items;this.configs=configs;}
-    public void start(){if(task!=null)return;plugin.getServer().getPluginManager().registerEvents(this,plugin);for(Player p:plugin.getServer().getOnlinePlayers())request(p);task=plugin.getServer().getScheduler().runTaskTimer(plugin,this::refreshArmor,40,40);}
+    public void start(){if(task!=null)return;plugin.getServer().getPluginManager().registerEvents(this,plugin);for(Player p:plugin.getServer().getOnlinePlayers())request(p);task=dev.duckmc.blastforge.Tasks.globalTimer(plugin,40,40,this::refreshArmor);}
     /** True when this player shows the pack: the server-sent pack loaded, or the admin states every player installs it manually. */
     public boolean loaded(Player player){return loaded.contains(player.getUniqueId())||configs.apply("config").getBoolean("resource-pack.assume-installed",true);}
     public void onStatusChange(Consumer<Player> observer){observers.add(Objects.requireNonNull(observer));}
@@ -41,7 +40,7 @@ public final class PackVisuals implements Listener,AutoCloseable {
     }
     /** Safe to call from click handlers: mutation is deferred and checked against the same inventory. */
     public void updateTitle(Player player,InventoryView view,Theme theme,int inputMask){
-        Inventory inventory=view.getTopInventory();plugin.getServer().getScheduler().runTask(plugin,()->{
+        Inventory inventory=view.getTopInventory();dev.duckmc.blastforge.Tasks.entity(plugin,player,()->{
             if(!player.isOnline()||player.getOpenInventory().getTopInventory()!=inventory)return;
             String value=(loaded(player)?(theme==Theme.RITUAL?"§d":theme==Theme.FORGING?"§6":"§8"):"§b")+text(player,theme,inputMask);String identity=System.identityHashCode(inventory)+":"+value;
             if(identity.equals(titles.get(player.getUniqueId())))return;view.setTitle(value);titles.put(player.getUniqueId(),identity);
@@ -50,9 +49,9 @@ public final class PackVisuals implements Listener,AutoCloseable {
     /** Fix old armor as soon as a player could try to wear it. */
     private void repair(Player player){for(ItemStack stack:player.getInventory().getContents())items.repairEquippable(stack);}
     @EventHandler(priority=EventPriority.LOWEST) public void repairOnUse(PlayerInteractEvent event){if(items.repairEquippable(event.getItem()))event.getPlayer().updateInventory();}
-    @EventHandler(priority=EventPriority.LOWEST) public void repairOnClick(org.bukkit.event.inventory.InventoryClickEvent event){boolean a=items.repairEquippable(event.getCurrentItem()),b=items.repairEquippable(event.getCursor());if(a||b&&event.getWhoClicked() instanceof Player p)plugin.getServer().getScheduler().runTask(plugin,()->{if(event.getWhoClicked() instanceof Player p)p.updateInventory();});}
+    @EventHandler(priority=EventPriority.LOWEST) public void repairOnClick(org.bukkit.event.inventory.InventoryClickEvent event){boolean a=items.repairEquippable(event.getCurrentItem()),b=items.repairEquippable(event.getCursor());if(a||b&&event.getWhoClicked() instanceof Player p)dev.duckmc.blastforge.Tasks.entity(plugin,event.getWhoClicked(),()->{if(event.getWhoClicked() instanceof Player p)p.updateInventory();});}
     @EventHandler public void repairOnJoin(PlayerJoinEvent event){repair(event.getPlayer());}
-    @EventHandler public void join(PlayerJoinEvent event){plugin.getServer().getScheduler().runTaskLater(plugin,()->request(event.getPlayer()),20);}
+    @EventHandler public void join(PlayerJoinEvent event){dev.duckmc.blastforge.Tasks.entityLater(plugin,event.getPlayer(),20,()->request(event.getPlayer()));}
     /** True when the pack comes from server.properties (resource-pack=...): the server sends it itself on join. */
     private boolean serverPack(){
         var c=configs.apply("config");String own=c.getString("resource-pack.url","");
@@ -72,12 +71,13 @@ public final class PackVisuals implements Listener,AutoCloseable {
         if(before!=loaded(event.getPlayer())){titles.remove(event.getPlayer().getUniqueId());for(var observer:List.copyOf(observers))observer.accept(event.getPlayer());refreshViewer(event.getPlayer());}
     }
     @EventHandler public void quit(PlayerQuitEvent event){loaded.remove(event.getPlayer().getUniqueId());titles.remove(event.getPlayer().getUniqueId());}
-    @EventHandler(ignoreCancelled=true) public void track(PlayerTrackEntityEvent event){if(event.getEntity() instanceof LivingEntity living)plugin.getServer().getScheduler().runTask(plugin,()->{if(event.getPlayer().isOnline()&&living.isValid())armor(event.getPlayer(),living,false);});}
-    @EventHandler public void changed(PlayerArmorChangeEvent event){plugin.getServer().getScheduler().runTask(plugin,()->{Player entity=event.getPlayer();if(!entity.isOnline())return;armor(entity,entity,true);for(Player viewer:entity.getTrackedBy())armor(viewer,entity,true);});}
-    @EventHandler public void respawn(PlayerRespawnEvent event){plugin.getServer().getScheduler().runTaskLater(plugin,()->refreshViewer(event.getPlayer()),2);}
-    @EventHandler public void world(PlayerChangedWorldEvent event){plugin.getServer().getScheduler().runTaskLater(plugin,()->refreshViewer(event.getPlayer()),2);}
+    @EventHandler(ignoreCancelled=true) public void track(PlayerTrackEntityEvent event){if(event.getEntity() instanceof LivingEntity living)dev.duckmc.blastforge.Tasks.entity(plugin,event.getPlayer(),()->{if(event.getPlayer().isOnline()&&living.isValid())armor(event.getPlayer(),living,false);});}
+    @EventHandler public void changed(PlayerArmorChangeEvent event){dev.duckmc.blastforge.Tasks.entity(plugin,event.getPlayer(),()->{Player entity=event.getPlayer();if(!entity.isOnline())return;armor(entity,entity,true);for(Player viewer:entity.getTrackedBy())armor(viewer,entity,true);});}
+    @EventHandler public void respawn(PlayerRespawnEvent event){dev.duckmc.blastforge.Tasks.entityLater(plugin,event.getPlayer(),2,()->refreshViewer(event.getPlayer()));}
+    @EventHandler public void world(PlayerChangedWorldEvent event){dev.duckmc.blastforge.Tasks.entityLater(plugin,event.getPlayer(),2,()->refreshViewer(event.getPlayer()));}
     private void refreshViewer(Player viewer){if(!viewer.isOnline())return;armor(viewer,viewer,true);for(Player entity:viewer.getWorld().getPlayers())if(entity!=viewer&&entity.getTrackedBy().contains(viewer))armor(viewer,entity,true);}
-    private void refreshArmor(){var players=new ArrayList<>(plugin.getServer().getOnlinePlayers());if(players.isEmpty())return;int checks=Math.min(players.size(),16);for(int i=0;i<checks;i++){Player entity=players.get(Math.floorMod(offset++,players.size()));armor(entity,entity,false);for(Player viewer:entity.getTrackedBy())armor(viewer,entity,false);}}
+    /** Up to 16 players per run, each refreshed on its own thread (its region on Folia). */
+    private void refreshArmor(){var players=new ArrayList<>(plugin.getServer().getOnlinePlayers());if(players.isEmpty())return;int checks=Math.min(players.size(),16);for(int i=0;i<checks;i++){Player entity=players.get(Math.floorMod(offset++,players.size()));dev.duckmc.blastforge.Tasks.now(plugin,entity,()->{if(!entity.isOnline())return;armor(entity,entity,false);for(Player viewer:entity.getTrackedBy())armor(viewer,entity,false);});}}
     private void armor(Player viewer,LivingEntity entity,boolean reset){
         if(!viewer.isOnline()||!entity.isValid()||!viewer.getWorld().equals(entity.getWorld())||!viewer.canSee(entity))return;
         var equipment=entity.getEquipment();if(equipment==null)return;var map=new EnumMap<EquipmentSlot,ItemStack>(EquipmentSlot.class);boolean custom=false;
