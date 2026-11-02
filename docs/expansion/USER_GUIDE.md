@@ -62,7 +62,7 @@ Sneak to mine a single block.
   netherite pickaxe or better; Wardenite pickaxes cannot insta-mine it. Raw Enderite smelts into ingots;
   two ingots stacked make an Enderite Stick.
 - **Wardenite** — no ore. Wardens drop Wardenite Scrap; 8 scrap around an Echo Shard make an ingot.
-  The Wardenite template is found in Ancient City chests.
+  The Wardenite template drops from Wardens (`loot.wardenite-template-chance`, default 20% per kill).
 - Templates: Siftie = 4 Siftie ingots + 4 blaze rods around a netherite template; Enderite = 4 Raw Enderite around a
   Siftie template.
 
@@ -76,7 +76,7 @@ tiers-enabled:
   enderite: true
   wardenite: true
 ```
-A tier set to `false` has no ore generation, no ore drops, Warden drops or Ancient City loot, no recipes or smelting,
+A tier set to `false` has no ore generation, no ore drops, Warden drops, no recipes or smelting,
 and nothing can be upgraded into it: the upgrade path skips it (for example Netherite → Enderite while Siftie is off;
 the Enderite template is then crafted around a netherite template). Tools, armour and items players already own keep
 working. The Dark Ritual takes a Netherite Ingot instead of a Wardenite ingot, and a Blaze Rod instead of an Enderite

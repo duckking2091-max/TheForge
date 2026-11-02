@@ -49,7 +49,7 @@ chapters:
       - "[figure:recipe_enderite_stick]"
       - "<dark_aqua><b>WARDENITE • SOURCE</b></dark_aqua><newline>There is no Wardenite ore. Every defeated Warden drops {materials:drops.wardenite-scrap.looting-0} Wardenite Scrap, or up to {materials:drops.wardenite-scrap.looting-3} with Looting III."
       - "<dark_aqua><b>WARDENITE • CRAFTING</b></dark_aqua><newline>Surround 1 Echo Shard with 8 Wardenite Scrap to craft a Wardenite Ingot. [figure:recipe_wardenite_ingot]"
-      - "<dark_aqua><b>WARDENITE • TEMPLATE</b></dark_aqua><newline>Find the Wardenite upgrade template in Ancient City chests ({materials:loot.wardenite-template-chance*100}% of chests). It cannot be crafted."
+      - "<dark_aqua><b>WARDENITE • TEMPLATE</b></dark_aqua><newline>Wardens can drop the Wardenite upgrade template ({materials:loot.wardenite-template-chance*100}% of kills). It cannot be crafted."
   - title: "The Forging Anvil"
     theme: forging   # page design: welcome miner ores forging upgrade ritual magician magic gear tips faq
     short: "Forging Anvil"   # name on the contents page
@@ -82,7 +82,7 @@ chapters:
       - "<blue><b>COPY A SIFTIE TEMPLATE</b></blue><newline>Makes 2. Deepslate and cobbled deepslate both work. [figure:recipe_siftie_copy]"
       - "<blue><b>ENDERITE TEMPLATE</b></blue><newline>Craft it with 4 Raw Enderite around a Siftie Template. [figure:recipe_enderite_template]"
       - "<blue><b>COPY AN ENDERITE TEMPLATE</b></blue><newline>Makes 2: a Siftie Ingot and 7 End Stone. [figure:recipe_enderite_copy]"
-      - "<blue><b>WARDENITE TEMPLATE</b></blue><newline>Find it in Ancient City chests. You cannot craft it. [figure:templates]"
+      - "<blue><b>WARDENITE TEMPLATE</b></blue><newline>Wardens can drop it. You cannot craft it. [figure:templates]"
       - "<blue><b>COPY A WARDENITE TEMPLATE</b></blue><newline>Makes 2. Deepslate and cobbled deepslate both work. [figure:recipe_wardenite_copy]"
       - "<blue><b>WHAT YOU CAN UPGRADE</b></blue><newline>Swords, pickaxes, axes, shovels, hoes, spears, helmets, chestplates, leggings and boots all work."
       - "<blue><b>LEVEL COSTS</b></blue><newline>Netherite: {materials:upgrades.netherite} levels<newline>Siftie: {materials:upgrades.siftie} levels<newline>Enderite: {materials:upgrades.enderite} levels<newline>Wardenite: {materials:upgrades.wardenite} levels<newline>The template, ingot and XP are consumed."
@@ -167,7 +167,7 @@ chapters:
       - "<gold><b>CAN'T FIND SIFTIE?</b></gold><newline>Mine in new Overworld chunks from Y {materials:generation.siftie.min-y} to {materials:generation.siftie.max-y} with a diamond pickaxe or better."
       - "<gold><b>CAN'T FIND ENDERITE?</b></gold><newline>Travel at least {materials:generation.enderite.minimum-distance} blocks from the End's centre, then mine inside outer islands."
       - "<gold><b>NO MINER IN SIGHT?</b></gold><newline>Remain near one location for {villagers:miner.stability-seconds/60} minutes. A spawn attempt may occur every {villagers:miner.interval-seconds/60} minutes; nearby villagers improve the chance."
-      - "<gold><b>NEED WARDENITE?</b></gold><newline>Defeat Wardens for scrap. Find the Wardenite upgrade template in Ancient City chests."
+      - "<gold><b>NEED WARDENITE?</b></gold><newline>Defeat Wardens for scrap and a chance at the Wardenite upgrade template."
       - "<gold><b>FORGING WON'T WORK?</b></gold><newline>Check your XP levels and item compatibility. Place only one item in the first slot."
       - "<gold><b>UPGRADE WON'T WORK?</b></gold><newline>Use the exact previous equipment tier with its matching template and ingot."
       - "<gold><b>WHERE ARE THE BOOKS?</b></gold><newline>Buy elemental books from a Magician. Craft Darkness from all four elemental books."

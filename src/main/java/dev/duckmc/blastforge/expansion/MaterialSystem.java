@@ -216,6 +216,8 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         Player killer=warden.getKiller();int looting=killer==null?0:Math.clamp(killer.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOTING),0,3);
         int[] defaults={1,1,2,3};int amount=Math.clamp(cfg().getInt("drops.wardenite-scrap.looting-"+looting,defaults[looting]),0,64);
         if(amount>0){ItemStack scrap=items.create("wardenite_scrap");scrap.setAmount(amount);event.getDrops().add(scrap);}
+        double chance=Math.clamp(cfg().getDouble("loot.wardenite-template-chance",.2),0,1);
+        if(ThreadLocalRandom.current().nextDouble()<chance)event.getDrops().add(items.create("wardenite_template"));
     }
     private boolean summoned(LivingEntity entity) {
         for(NamespacedKey key:entity.getPersistentDataContainer().getKeys())if(key.getNamespace().equals("blastforge") && key.getKey().contains("summon"))return true;
@@ -223,6 +225,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     }
     @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
     public void ancientCity(LootGenerateEvent event) {
+        if(true)return; // the Wardenite template now drops from Wardens
         if(event.isPlugin() || !items.tierEnabled("wardenite") || !event.getLootTable().getKey().equals(NamespacedKey.minecraft("chests/ancient_city")))return;
         Location location=event.getInventoryHolder() instanceof BlockState state?state.getLocation():event.getLootContext().getLocation();
         if(location.getWorld()==null)return;

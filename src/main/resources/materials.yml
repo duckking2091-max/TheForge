@@ -85,7 +85,7 @@ drops:
     looting-2: 2
     looting-3: 3
 loot:
-  wardenite-template-chance: 0.2
+  wardenite-template-chance: 0.2   # chance a killed Warden drops the Wardenite template
 armor-perks:
   activation: any-piece
   inherit: true
