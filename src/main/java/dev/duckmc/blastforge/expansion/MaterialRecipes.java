@@ -21,18 +21,29 @@ final class MaterialRecipes implements Listener,AutoCloseable {
         define("enderite_stick",new String[]{"I","I"},Map.of('I',"enderite_ingot"));
         define("wardenite_ingot",new String[]{"SSS","SES","SSS"},Map.of('S',"wardenite_scrap",'E',"ECHO_SHARD"));
         define("enchanting_anvil",new String[]{"IBI"," A ","DDD"},Map.of('I',"IRON_BLOCK",'B',"forging_book",'A',"ANVIL",'D',"DIAMOND"));
+        // Copying templates, like vanilla's netherite template: the template in the middle, one special item on top,
+        // seven blocks around; makes two. "A|B" accepts either block.
+        define("siftie_template_copy",new String[]{"BDB","BTB","BBB"},Map.of('B',"DEEPSLATE|COBBLED_DEEPSLATE",'D',"DIAMOND",'T',"siftie_template"));
+        define("enderite_template_copy",new String[]{"ESE","ETE","EEE"},Map.of('E',"END_STONE",'S',"siftie_ingot",'T',"enderite_template"));
+        define("wardenite_template_copy",new String[]{"BXB","BTB","BBB"},Map.of('B',"DEEPSLATE|COBBLED_DEEPSLATE",'X',"ECHO_SHARD",'T',"wardenite_template"));
     }
-    private void define(String id,String[] shape,Map<Character,String> components) {shapes.put(id,shape);ingredients.put(id,components);}
+    private void define(String id,String[] shape,Map<Character,String> components) {shapes.put(id,shape);ingredients.put(id,new HashMap<>(components));}
+    /** What a recipe makes: "x_template_copy" makes two "x_template". */
+    static String result(String recipe){return recipe.endsWith("_copy")?recipe.substring(0,recipe.length()-5):recipe;}
+    static int amount(String recipe){return recipe.endsWith("_copy")?2:1;}
     void start() {
         plugin.getServer().getPluginManager().registerEvents(this,plugin);
         // tiers turned off in materials.yml lose their recipes; Enderite's template uses a netherite one while Siftie is off
-        if(!items.tierEnabled("siftie"))ingredients.put("enderite_template",Map.of('S',"enderite_scrap",'T',"NETHERITE_UPGRADE_SMITHING_TEMPLATE"));
+        if(!items.tierEnabled("siftie")){ingredients.put("enderite_template",Map.of('S',"enderite_scrap",'T',"NETHERITE_UPGRADE_SMITHING_TEMPLATE"));ingredients.get("enderite_template_copy").put('S',"DIAMOND");}
         for(var entry:shapes.entrySet()) {
             if(!enabled(entry.getKey()))continue;
             // Keep the legacy anvil recipe key so previously discovered recipes still resolve.
             NamespacedKey key=key(entry.getKey());plugin.getServer().removeRecipe(key);
-            ShapedRecipe recipe=new ShapedRecipe(key,items.create(entry.getKey()));recipe.shape(entry.getValue());
-            ingredients.get(entry.getKey()).forEach((symbol,id)->recipe.setIngredient(symbol,carrier(id)));
+            ItemStack made=items.create(result(entry.getKey()));made.setAmount(amount(entry.getKey()));
+            ShapedRecipe recipe=new ShapedRecipe(key,made);recipe.shape(entry.getValue());
+            ingredients.get(entry.getKey()).forEach((symbol,id)->{
+                if(id.contains("|"))recipe.setIngredient(symbol,new RecipeChoice.MaterialChoice(Arrays.stream(id.split("\\|")).map(Material::valueOf).toList()));
+                else recipe.setIngredient(symbol,carrier(id));});
             plugin.getServer().addRecipe(recipe);keys.add(key);
         }
         NamespacedKey darkness=key("darkness_book");plugin.getServer().removeRecipe(darkness);
@@ -78,7 +89,9 @@ final class MaterialRecipes implements Listener,AutoCloseable {
         return true;
     }
     private boolean ingredient(ItemStack item,String expected) {
-        if(empty(item))return false;Material material=Material.getMaterial(expected);
+        if(empty(item))return false;
+        if(expected.contains("|")){for(String option:expected.split("\\|"))if(ingredient(item,option))return true;return false;}
+        Material material=Material.getMaterial(expected);
         if(material==null)return expected.equals(items.id(item));
         return item.getType()==material && !marked(item);
     }

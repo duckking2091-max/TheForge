@@ -5,15 +5,15 @@
 ## 📥 Download & quick setup
 | What | Where |
 |---|---|
-| **Plugin** — `TheForge-1.3.0.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
+| **Plugin** — `TheForge-1.4.0.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
 | **Resource pack** — `TheForge-pack.zip` | [The Forge Resource Pack on Modrinth](https://modrinth.com/resourcepack/the-forge-resource-pack) (the same file works for every 1.21.x version) |
 
-1. Put `TheForge-1.3.0.jar` in your server's `plugins` folder (Paper, Folia, Purpur or Pufferfish **1.21.0 – 1.21.11**, Java 21).
+1. Put `TheForge-1.4.0.jar` in your server's `plugins` folder (Paper, Folia, Purpur or Pufferfish **1.21.0 – 1.21.11**, Java 21).
 2. Open [The Forge Resource Pack](https://modrinth.com/resourcepack/the-forge-resource-pack), go to its **Versions** tab, right-click the download button of the newest version and **Copy link**.
-   Then add to `server.properties`. The SHA-1 of the current pack (1.1.0) is `815cb4e106c7bb7d6ae4116dc10ccf36f09862ef`:
+   Then add to `server.properties`. The SHA-1 of the current pack (1.4.0) is `29b9b1913a1c8f2c7958958a80eb691bda6f038a`:
    ```
    resource-pack=<the copied Modrinth link>
-   resource-pack-sha1=815cb4e106c7bb7d6ae4116dc10ccf36f09862ef
+   resource-pack-sha1=29b9b1913a1c8f2c7958958a80eb691bda6f038a
    require-resource-pack=true
    ```
    No other hosting needed: Modrinth's link is a direct download.
@@ -53,6 +53,7 @@ Buy the **Book of Forging** from the Wandering Miner and craft the Forging Anvil
 - **Forging** — merge enchantments (even conflicting ones!), repair with ingots, combine damaged items,
   or extract enchantments onto books.
 - **Upgrading** — template + gear + ingot: Diamond → Netherite → Siftie → Enderite → Wardenite.
+- **Copying templates** — Siftie, Enderite and Wardenite templates can be duplicated (makes 2): Diamond + 7 deepslate, Siftie Ingot + 7 End Stone, or Echo Shard + 7 deepslate around the template.
   Enchantments and names are kept.
 - **Dark Ritual** — eight rare ingredients around one slot create the **Legendary Scythe**.
 
@@ -122,19 +123,3 @@ Admin commands default to operators. Players need `blastforge.use` (on by defaul
 - Siftie and Enderite only generate in **new** chunks — explore!
 - Everything is configurable: drop chances, prices, cooldowns, damage, ore heights, the scythe limit.
 - Your data is safe: interrupted crafts, crashes and full inventories never duplicate or delete items.
-
----
-
-## 🔧 Building from source
-Requires Java 21 and Maven.
-```
-mvn clean package
-python .tools/generate_expansion_pack.py --repack
-```
-The first command runs the tests and writes `target/TheForge-1.3.0.jar`; the second validates the `resource-pack/`
-folder, adds the overlays for older 1.21 clients (`.tools/legacy_pack.py`) and builds `release/expansion/TheForge-pack.zip`
-with its SHA-1. `.tools/check-versions.sh` compiles the plugin against every Paper 1.21.x API.
-Hand-made art lives in `.tools/art/`; the guide book's pictures are rebuilt with `.tools/art/guide/fig/figures.py`.
-
-Full player and server guide: [docs/expansion/USER_GUIDE.md](docs/expansion/USER_GUIDE.md).
-Formerly known as BlastForge: updating replaces the jar, and the plugin moves `plugins/BlastForge` to `plugins/TheForge` by itself.

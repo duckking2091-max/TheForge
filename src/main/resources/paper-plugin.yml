@@ -1,5 +1,5 @@
 name: TheForge
-version: '1.3.0'
+version: '1.4.0'
 main: dev.duckmc.blastforge.BlastForge
 bootstrapper: dev.duckmc.blastforge.BlastBootstrap
 api-version: '1.21'

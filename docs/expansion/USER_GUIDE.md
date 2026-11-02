@@ -20,7 +20,7 @@ The Forge runs on **every Paper, Folia, Purpur and Pufferfish 1.21.x server, fro
 ## Install or update
 
 1. Stop the server and back up the worlds and `plugins/TheForge` together.
-2. Keep one The Forge JAR in `plugins` (`TheForge-1.3.0.jar`).
+2. Keep one The Forge JAR in `plugins` (`TheForge-1.4.0.jar`).
 3. Start Paper, Folia, Purpur or Pufferfish 1.21.x. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
    Never delete the database when editing settings.
 4. Resource pack: host `TheForge-pack.zip` at a direct link and set `resource-pack` and

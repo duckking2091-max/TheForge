@@ -65,6 +65,17 @@ class MaterialRecipesTest {
         var wrongSource=new org.bukkit.event.inventory.FurnaceSmeltEvent(block,new ItemStack(Material.RAW_IRON),custom.getResult(),custom);recipes.smelt(wrongSource);assertTrue(wrongSource.isCancelled());
         var valid=new org.bukkit.event.inventory.FurnaceSmeltEvent(block,items.create("raw_siftie"),custom.getResult(),custom);recipes.smelt(valid);assertFalse(valid.isCancelled());assertEquals(custom.getResult(),valid.getResult());
     }    static ItemStack vanilla(Material m){return new ItemStack(m);}
+    ItemStack[] copyGrid(Material block,ItemStack top,String template){ItemStack[] g=new ItemStack[9];java.util.Arrays.setAll(g,n->vanilla(block));g[1]=top;g[4]=items.create(template);return g;}
+    @Test void templatesCopyWithTheirOwnIngredientsAndMakeTwo(){
+        assertTrue(recipes.matches("siftie_template_copy",copyGrid(Material.COBBLED_DEEPSLATE,vanilla(Material.DIAMOND),"siftie_template")));
+        var mixed=copyGrid(Material.DEEPSLATE,vanilla(Material.DIAMOND),"siftie_template");mixed[0]=vanilla(Material.COBBLED_DEEPSLATE);
+        assertTrue(recipes.matches("siftie_template_copy",mixed),"deepslate and cobbled deepslate can be mixed");
+        assertTrue(recipes.matches("enderite_template_copy",copyGrid(Material.END_STONE,items.create("siftie_ingot"),"enderite_template")));
+        assertTrue(recipes.matches("wardenite_template_copy",copyGrid(Material.DEEPSLATE,vanilla(Material.ECHO_SHARD),"wardenite_template")));
+        assertFalse(recipes.matches("siftie_template_copy",copyGrid(Material.COBBLED_DEEPSLATE,vanilla(Material.DIAMOND),"enderite_template")),"the right template only");
+        var plain=copyGrid(Material.COBBLED_DEEPSLATE,vanilla(Material.DIAMOND),"siftie_template");plain[4]=vanilla(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+        assertFalse(recipes.matches("siftie_template_copy",plain),"a plain netherite template cannot be turned into two Siftie ones");
+        assertFalse(recipes.matches("enderite_template_copy",copyGrid(Material.END_STONE,vanilla(Material.IRON_INGOT),"enderite_template")),"an iron ingot is not a Siftie ingot");
+        assertEquals("siftie_template",MaterialRecipes.result("siftie_template_copy"));assertEquals(2,MaterialRecipes.amount("siftie_template_copy"));
+    }
 }
-
-
