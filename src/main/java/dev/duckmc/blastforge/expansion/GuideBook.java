@@ -66,11 +66,25 @@ public final class GuideBook implements Listener,AutoCloseable {
     static String figure(String paragraph){var m=FIGURE.matcher(paragraph);return m.find()?m.group(1):null;}
     static String stripFigure(String paragraph){return FIGURE.matcher(paragraph).replaceFirst("");}
     record Chapter(String title,String color,List<String> paragraphs,String theme,String shortTitle){}
+    /**
+     * Sections about a tier turned off in materials.yml are left out of the guide: their heading names the tier
+     * ("SIFTIE • LOCATION", "WARDENITE EQUIPMENT"), an upgrade step leads into it, or their picture shows it.
+     */
+    boolean hidden(String paragraph){
+        FileConfiguration materials=configs.apply("materials");if(materials==null)return false;
+        String figure=figure(paragraph),text=stripFigure(paragraph);int nl=text.indexOf("<newline>");
+        String heading=(nl<0?text:text.substring(0,nl)).replaceAll("<[^>]*>","").toUpperCase(Locale.ROOT),body=text.toUpperCase(Locale.ROOT);
+        for(String tier:List.of("siftie","enderite","wardenite")){
+            if(materials.getBoolean("tiers-enabled."+tier,true))continue;String name=tier.toUpperCase(Locale.ROOT);
+            if(heading.contains(name)||heading.startsWith("UPGRADE •")&&body.contains(name)||figure!=null&&figure.contains(tier))return true;
+        }
+        return false;
+    }
     List<Chapter> chapters(FileConfiguration guide){
         var out=new ArrayList<Chapter>();
         for(Map<?,?> raw:guide.getMapList("chapters")){
             Object paragraphs=raw.get("text");var list=new ArrayList<String>();
-            if(paragraphs instanceof List<?> l)for(Object o:l)list.add(fill(String.valueOf(o)));
+            if(paragraphs instanceof List<?> l)for(Object o:l){String p=String.valueOf(o);if(!hidden(p))list.add(fill(p));}
             out.add(new Chapter(fill(String.valueOf(raw.get("title"))),String.valueOf(raw.containsKey("color")?raw.get("color"):"gold"),list,raw.containsKey("theme")?String.valueOf(raw.get("theme")):null,raw.containsKey("short")?fill(String.valueOf(raw.get("short"))):null));
         }
         return out;

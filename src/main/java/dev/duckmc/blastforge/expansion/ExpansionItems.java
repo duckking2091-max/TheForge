@@ -53,6 +53,11 @@ public final class ExpansionItems {
         // Reject copied identifiers on incompatible carrier items, including incorrectly renamed gear.
         return id!=null && BASES.get(id)==stack.getType()?id:"";
     }
+    /**
+     * materials.yml tiers-enabled.<tier> (siftie / enderite / wardenite, default true). A disabled tier has no ore,
+     * drops, loot, recipes, smelting or upgrades into it; items players already own keep working.
+     */
+    public boolean tierEnabled(String tier){if(!TIERS.contains(tier))return true;var cfg=configs.apply("materials");return cfg==null || cfg.getBoolean("tiers-enabled."+tier,true);}
     public ItemStack create(String id) {
         Material material=BASES.get(id);
         if(material==null)throw new IllegalArgumentException("Unknown The Forge item: "+id);
@@ -84,7 +89,10 @@ public final class ExpansionItems {
         String piece=equipmentPiece(input),previous=equipmentTier(input);
         List<String> progression=List.of("diamond","netherite","siftie","enderite","wardenite");
         int next=progression.indexOf(target);
-        if(input.getAmount()!=1 || piece.isEmpty() || next<1 || !progression.get(next-1).equals(previous))
+        // the previous tier, or an earlier one when every tier in between is turned off (materials.yml tiers-enabled)
+        int from=progression.indexOf(previous);boolean skipsOnlyDisabled=from>=0&&from<next;
+        for(int i=from+1;skipsOnlyDisabled&&i<next;i++)if(tierEnabled(progression.get(i)))skipsOnlyDisabled=false;
+        if(input.getAmount()!=1 || piece.isEmpty() || next<1 || !skipsOnlyDisabled)
             throw new IllegalArgumentException("Upgrade requires exactly one equipment item from the previous tier");
         ItemStack result=input.clone();
         ItemMeta source=input.getItemMeta();

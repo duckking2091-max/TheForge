@@ -5,10 +5,10 @@
 ## 📥 Download & quick setup
 | What | Where |
 |---|---|
-| **Plugin** — `TheForge-1.2.0.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
+| **Plugin** — `TheForge-1.3.0.jar` | Here on Modrinth (Versions tab) or on [GitHub Releases](https://github.com/duckking2091-max/TheForge/releases/latest) |
 | **Resource pack** — `TheForge-pack.zip` | [The Forge Resource Pack on Modrinth](https://modrinth.com/resourcepack/the-forge-resource-pack) (the same file works for every 1.21.x version) |
 
-1. Put `TheForge-1.2.0.jar` in your server's `plugins` folder (Paper, Folia, Purpur or Pufferfish **1.21.0 – 1.21.11**, Java 21).
+1. Put `TheForge-1.3.0.jar` in your server's `plugins` folder (Paper, Folia, Purpur or Pufferfish **1.21.0 – 1.21.11**, Java 21).
 2. Open [The Forge Resource Pack](https://modrinth.com/resourcepack/the-forge-resource-pack), go to its **Versions** tab, right-click the download button of the newest version and **Copy link**.
    Then add to `server.properties`. The SHA-1 of the current pack (1.1.0) is `815cb4e106c7bb7d6ae4116dc10ccf36f09862ef`:
    ```
@@ -98,9 +98,11 @@ The Forge runs on **every Paper, Folia, Purpur and Pufferfish 1.21.x server, fro
 | Custom armour looks for Siftie, Enderite and Wardenite | 1.21.2+ (older: netherite look; stats are the same) |
 | Blast offered by enchanting tables | most 1.21 builds (the very first ones: librarian books only) |
 
-**Folia note:** Folia support is new in 1.2.0. Every timed job runs on the region thread that owns it; temporary spell blocks left at a shutdown are restored after the next start instead of during it. Please report anything odd on Folia.
+**Folia note:** supported since 1.2.0 and tested by the server owner. Every timed job runs on the region thread that owns it; temporary spell blocks left at a shutdown are restored after the next start instead of during it.
 
 ## ⚙️ Configuration
+Don't want a tier? Set `tiers-enabled.siftie` / `enderite` / `wardenite` to `false` in `materials.yml`: its ore, drops, recipes and upgrades are switched off, and gear players already own keeps working.
+
 Adjust everything you like in `plugins/TheForge/` (`magic.yml`, `materials.yml`, `villagers.yml`, `scythe.yml`, …)
 and run `/forge reload`.
 
@@ -129,7 +131,7 @@ Requires Java 21 and Maven.
 mvn clean package
 python .tools/generate_expansion_pack.py --repack
 ```
-The first command runs the tests and writes `target/TheForge-1.2.0.jar`; the second validates the `resource-pack/`
+The first command runs the tests and writes `target/TheForge-1.3.0.jar`; the second validates the `resource-pack/`
 folder, adds the overlays for older 1.21 clients (`.tools/legacy_pack.py`) and builds `release/expansion/TheForge-pack.zip`
 with its SHA-1. `.tools/check-versions.sh` compiles the plugin against every Paper 1.21.x API.
 Hand-made art lives in `.tools/art/`; the guide book's pictures are rebuilt with `.tools/art/guide/fig/figures.py`.

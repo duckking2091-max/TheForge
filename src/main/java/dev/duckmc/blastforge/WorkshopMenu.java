@@ -103,7 +103,7 @@ final class WorkshopMenu implements Listener {
         ItemStack hint=switch(index){case 0->items.create("darkness_book");case 1->items.create("wardenite_ingot");case 2->items.create("enderite_stick");case 3->items.create("dragon_heart");
             case 4->new ItemStack(Material.ECHO_SHARD);case 5->items.create("warden_heart");case 6->items.create("bat_wing");default->new ItemStack(Material.NETHERITE_INGOT);};
         // A display-only copy: it is not in the session buffer, so clicking it can never take it.
-        hint.editMeta(m->{m.displayName(Component.text("Place: "+RITUAL_LABELS[index],NamedTextColor.LIGHT_PURPLE));m.lore(List.of(Component.text("Ritual ingredient slot",NamedTextColor.GRAY)));m.getPersistentDataContainer().set(new NamespacedKey("blastforge","ritual_hint"),PersistentDataType.BYTE,(byte)1);});
+        hint.editMeta(m->{m.displayName(Component.text("Place: "+WorkshopRecipes.ritualLabel(items,index,RITUAL_LABELS[index]),NamedTextColor.LIGHT_PURPLE));m.lore(List.of(Component.text("Ritual ingredient slot",NamedTextColor.GRAY)));m.getPersistentDataContainer().set(new NamespacedKey("blastforge","ritual_hint"),PersistentDataType.BYTE,(byte)1);});
         return hint;
     }
     /** Whether a ritual ring slot accepts this item: each slot takes only its own ingredient. */

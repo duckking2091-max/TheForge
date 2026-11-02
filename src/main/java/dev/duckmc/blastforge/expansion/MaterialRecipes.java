@@ -25,7 +25,10 @@ final class MaterialRecipes implements Listener,AutoCloseable {
     private void define(String id,String[] shape,Map<Character,String> components) {shapes.put(id,shape);ingredients.put(id,components);}
     void start() {
         plugin.getServer().getPluginManager().registerEvents(this,plugin);
+        // tiers turned off in materials.yml lose their recipes; Enderite's template uses a netherite one while Siftie is off
+        if(!items.tierEnabled("siftie"))ingredients.put("enderite_template",Map.of('S',"enderite_scrap",'T',"NETHERITE_UPGRADE_SMITHING_TEMPLATE"));
         for(var entry:shapes.entrySet()) {
+            if(!enabled(entry.getKey()))continue;
             // Keep the legacy anvil recipe key so previously discovered recipes still resolve.
             NamespacedKey key=key(entry.getKey());plugin.getServer().removeRecipe(key);
             ShapedRecipe recipe=new ShapedRecipe(key,items.create(entry.getKey()));recipe.shape(entry.getValue());
@@ -36,7 +39,12 @@ final class MaterialRecipes implements Listener,AutoCloseable {
         ShapelessRecipe recipe=new ShapelessRecipe(darkness,items.create("darkness_book"));
         for(int i=0;i<4;i++)recipe.addIngredient(Material.ENCHANTED_BOOK);
         plugin.getServer().addRecipe(recipe);keys.add(darkness);
-        smelting("raw_siftie","siftie_ingot");smelting("enderite_scrap","enderite_ingot");
+        if(items.tierEnabled("siftie"))smelting("raw_siftie","siftie_ingot");if(items.tierEnabled("enderite"))smelting("enderite_scrap","enderite_ingot");
+    }
+    /** A recipe exists only while the tier it makes is turned on. */
+    private boolean enabled(String recipe){
+        for(String tier:List.of("siftie","enderite","wardenite"))if(recipe.startsWith(tier+"_"))return items.tierEnabled(tier);
+        return true;
     }
     private NamespacedKey key(String id) {return new NamespacedKey("blastforge",id.equals("enchanting_anvil")?id:"materials_"+id);}
     private void smelting(String from,String to) {
@@ -52,6 +60,7 @@ final class MaterialRecipes implements Listener,AutoCloseable {
     }
     private Material carrier(String id) {Material vanilla=Material.getMaterial(id);return vanilla!=null?vanilla:items.create(id).getType();}
     boolean matches(String recipe,ItemStack[] matrix) {
+        if(!enabled(recipe))return false;
         if(matrix==null || (matrix.length!=4 && matrix.length!=9))return false;
         if(recipe.equals("darkness_book")) {
             Set<String> required=new HashSet<>(List.of("fire_book","water_book","earth_book","wind_book"));int count=0;

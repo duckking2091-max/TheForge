@@ -108,7 +108,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         if(store.get("material_chunks",key)!=null)return;
         // Record first so neither repeated ChunkLoadEvents nor a crash can repeat rewards in this chunk.
         store.put("material_chunks",key,"1");
-        String path="generation."+tier+".";if(!cfg().getBoolean(path+"enabled",true))return;
+        String path="generation."+tier+".";if(!cfg().getBoolean(path+"enabled",true)||!items.tierEnabled(tier))return;
         double distance=Math.max(0,cfg().getDouble("generation.enderite.minimum-distance",1024));
         if(tier.equals("enderite") && Math.hypot(chunk.getX()*16.0+8,chunk.getZ()*16.0+8)<distance)return;
         int min=Math.max(world.getMinHeight(),cfg().getInt(path+"min-y",tier.equals("siftie")?-60:20));
@@ -171,7 +171,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
         Block block=event.getBlock();String tier=tier(block);if(tier.isEmpty())return;
         String position=position(block);if(!breaking.add(position))return;
         ItemStack tool=event.getPlayer().getInventory().getItemInMainHand().clone();
-        boolean rewards=event.getPlayer().getGameMode()!=GameMode.CREATIVE && canMine(block,tool);
+        boolean rewards=event.getPlayer().getGameMode()!=GameMode.CREATIVE && canMine(block,tool) && items.tierEnabled(tier);   // a turned-off tier's leftover ore gives nothing
         event.setDropItems(false);event.setExpToDrop(0);
         dev.duckmc.blastforge.Tasks.at(plugin,block,()->{
             breaking.remove(position);
@@ -210,7 +210,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     public void fade(BlockFadeEvent event){if(isOre(event.getBlock()))event.setCancelled(true);}
     @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
     public void warden(EntityDeathEvent event) {
-        if(!(event.getEntity() instanceof Warden warden) || summoned(warden))return;
+        if(!(event.getEntity() instanceof Warden warden) || summoned(warden) || !items.tierEnabled("wardenite"))return;
         String key=warden.getUniqueId().toString();if(store.get("material_deaths",key)!=null)return;
         store.put("material_deaths",key,"wardenite_scrap");
         Player killer=warden.getKiller();int looting=killer==null?0:Math.clamp(killer.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOTING),0,3);
@@ -223,7 +223,7 @@ public final class MaterialSystem implements Listener,AutoCloseable {
     }
     @EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
     public void ancientCity(LootGenerateEvent event) {
-        if(event.isPlugin() || !event.getLootTable().getKey().equals(NamespacedKey.minecraft("chests/ancient_city")))return;
+        if(event.isPlugin() || !items.tierEnabled("wardenite") || !event.getLootTable().getKey().equals(NamespacedKey.minecraft("chests/ancient_city")))return;
         Location location=event.getInventoryHolder() instanceof BlockState state?state.getLocation():event.getLootContext().getLocation();
         if(location.getWorld()==null)return;
         String key=location.getWorld().getUID()+":"+location.getBlockX()+":"+location.getBlockY()+":"+location.getBlockZ();

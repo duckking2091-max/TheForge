@@ -1,3 +1,12 @@
+# Turn a whole material tier on or off (true = on). A tier that is off has no ore generation, no ore/mob drops or
+# loot, no recipes or smelting, and nothing can be upgraded into it (the upgrade path skips it, e.g. Netherite ->
+# Enderite while Siftie is off). Tools, armour and items players already own keep working.
+# The Dark Ritual then takes a Netherite Ingot instead of a Wardenite ingot, and a Blaze Rod instead of an Enderite stick.
+tiers-enabled:
+  siftie: true
+  enderite: true
+  wardenite: true
+
 tiers:
   siftie:
     # Numbers as shown in the item tooltip.

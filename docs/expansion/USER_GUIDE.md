@@ -1,4 +1,4 @@
-# The Forge 1.2.0 — player and server guide
+# The Forge 1.3.0 — player and server guide
 
 Target: Paper, Folia, Purpur or Pufferfish 1.21.0 – 1.21.11 (Java 21+). Purpur and Pufferfish are built on Paper and run The Forge unchanged; on Folia every job runs on the region that owns it. Spigot is not supported.
 Players also get this information in-game: new players receive **The Forging Starter**, an illustrated two-page
@@ -15,12 +15,12 @@ The Forge runs on **every Paper, Folia, Purpur and Pufferfish 1.21.x server, fro
 | Custom armour looks for Siftie, Enderite and Wardenite | 1.21.2+ (older: netherite look; stats are the same) |
 | Blast offered by enchanting tables | most 1.21 builds (the very first ones: librarian books only) |
 
-**Folia note:** Folia support is new in 1.2.0. Every timed job runs on the region thread that owns it; temporary spell blocks left at a shutdown are restored after the next start instead of during it. Please report anything odd on Folia.
+**Folia note:** supported since 1.2.0 and tested by the server owner. Every timed job runs on the region thread that owns it; temporary spell blocks left at a shutdown are restored after the next start instead of during it.
 
 ## Install or update
 
 1. Stop the server and back up the worlds and `plugins/TheForge` together.
-2. Keep one The Forge JAR in `plugins` (`TheForge-1.2.0.jar`).
+2. Keep one The Forge JAR in `plugins` (`TheForge-1.3.0.jar`).
 3. Start Paper, Folia, Purpur or Pufferfish 1.21.x. The settings files, `guide.yml` and `blastforge.db` are created in `plugins/TheForge`.
    Never delete the database when editing settings.
 4. Resource pack: host `TheForge-pack.zip` at a direct link and set `resource-pack` and
@@ -67,6 +67,21 @@ Sneak to mine a single block.
   Siftie template.
 
 All values are in `materials.yml`. Existing chunks are not regenerated.
+
+### Turning a tier off
+Each material tier can be switched off in `materials.yml`:
+```yaml
+tiers-enabled:
+  siftie: true
+  enderite: true
+  wardenite: true
+```
+A tier set to `false` has no ore generation, no ore drops, Warden drops or Ancient City loot, no recipes or smelting,
+and nothing can be upgraded into it: the upgrade path skips it (for example Netherite → Enderite while Siftie is off;
+the Enderite template is then crafted around a netherite template). Tools, armour and items players already own keep
+working. The Dark Ritual takes a Netherite Ingot instead of a Wardenite ingot, and a Blaze Rod instead of an Enderite
+stick, while those tiers are off. The guide book hides the pages about a tier that is off. Run `/forge reload` after changing it.
+
 
 ## Magic books
 
