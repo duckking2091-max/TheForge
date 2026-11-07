@@ -43,17 +43,19 @@ Durability, Unbreaking, Fortune, Silk Touch and protected regions all work per b
 |---|---|---|
 | **Siftie** | Deep Overworld (Y −60 to −30) | Mine with diamond or better, smelt Raw Siftie |
 | **Enderite** | Buried in the outer End islands | Netherite pickaxe, smelt Raw Enderite |
-| **Wardenite** | No ore! | Wardens drop scrap — 8 scrap + an Echo Shard make an ingot |
+| **Wardenite** | No ore! | Wardens drop scrap — 8 scrap + an Echo Shard make an ingot. Wardens can also drop the Wardenite template |
 
 Full sets of tools and armour for each tier, each stronger than the last, with their own perks
 (Enderite armour softens ender pearls, Wardenite armour resists the Warden's sonic boom).
+
+**Copy your templates** in a crafting table (makes 2): put the template in the middle, then
+Diamond + 7 Deepslate (Siftie), Siftie Ingot + 7 End Stone (Enderite) or Echo Shard + 7 Deepslate (Wardenite).
 
 ### 🔨 The Forging Anvil
 Buy the **Book of Forging** from the Wandering Miner and craft the Forging Anvil. One screen, three workshops:
 - **Forging** — merge enchantments (even conflicting ones!), repair with ingots, combine damaged items,
   or extract enchantments onto books.
 - **Upgrading** — template + gear + ingot: Diamond → Netherite → Siftie → Enderite → Wardenite.
-- **Copying templates** — Siftie, Enderite and Wardenite templates can be duplicated (makes 2): Diamond + 7 deepslate, Siftie Ingot + 7 End Stone, or Echo Shard + 7 deepslate around the template.
   Enchantments and names are kept.
 - **Dark Ritual** — eight rare ingredients around one slot create the **Legendary Scythe**.
 
@@ -123,3 +125,5 @@ Admin commands default to operators. Players need `blastforge.use` (on by defaul
 - Siftie and Enderite only generate in **new** chunks — explore!
 - Everything is configurable: drop chances, prices, cooldowns, damage, ore heights, the scythe limit.
 - Your data is safe: interrupted crafts, crashes and full inventories never duplicate or delete items.
+
+
